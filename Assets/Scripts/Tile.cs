@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace DefaultNamespace
 {
@@ -9,18 +10,14 @@ namespace DefaultNamespace
             EMPTY,
             BOMB,
             CLUE,
-            MASK
         }
-        
-        public TileType Type => _type;
-        
-        public bool IsRevealed => _isRevealed;
 
-        public Vector2Int Position
-        {
-            get => _position;
-            set => _position = value;
-        }
+        public TileType Type => _type;
+
+        public bool IsRevealed => _isRevealed;
+        public bool IsFlagged => _isFlagged;
+
+        public Vector2Int Position { get; set; }
 
         private Sprite _defaultSprite;
         private Sprite _maskSprite;
@@ -29,13 +26,18 @@ namespace DefaultNamespace
 
         private TileType _type;
         private bool _isRevealed;
-        
+        private bool _isFlagged;
+
+        private const string GRAPHICS_PATH = "Graphics/";
+        private const string MASK_PREFAB_NAME = "mask";
+        private const string FLAG_PREFAB_NAME = "flag";
+
         public void InitWithType(TileType type, string path)
         {
             _type = type;
-            _defaultSprite = Resources.Load<Sprite>("Graphics/" + path);
-            _maskSprite = Resources.Load<Sprite>("Graphics/Mask");
-            
+            _defaultSprite = Resources.Load<Sprite>(GRAPHICS_PATH + path);
+            _maskSprite = Resources.Load<Sprite>(GRAPHICS_PATH + MASK_PREFAB_NAME);
+
             GetComponent<SpriteRenderer>().sprite = _maskSprite;
         }
 
@@ -46,5 +48,15 @@ namespace DefaultNamespace
         }
 
         private void OnMouseDown() => Game.Instance.OnTileClicked(this);
+
+        private void OnMouseOver()
+        {
+            if (Input.GetMouseButton(1))
+            {
+                GetComponent<SpriteRenderer>().sprite =
+                    _isFlagged ? _maskSprite : Resources.Load<Sprite>(GRAPHICS_PATH + FLAG_PREFAB_NAME);
+                _isFlagged = !_isFlagged;
+            }
+        }
     }
 }
