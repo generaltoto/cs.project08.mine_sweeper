@@ -1,10 +1,75 @@
-﻿using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using UnityEngine;
+using Object = UnityEngine.Object;
+using Random = UnityEngine.Random;
 
 namespace DefaultNamespace
 {
     public class Game : MonoBehaviour
     {
+        public static Game Instance => _instance ??= FindObjectOfType<Game>();
+
+        public void OnTileClicked(Tile tile)
+        {
+            switch (tile.Type)
+            {
+                case Tile.TileType.BOMB :
+                    tile.Reveal();
+                    Debug.Log("Game Over");
+                    break;
+                case Tile.TileType.CLUE :
+                    tile.Reveal();
+                    break;
+                case Tile.TileType.EMPTY:
+                    var tilePos = tile.Position;
+                    FloodFill(tilePos.x, tilePos.y);
+                    break;
+            }
+        }
+        private void FloodFill(int x, int y)
+        {
+            // List of all tiles to check, int x, int y and bool isClue.
+            // Is the tile is a clue, we don't need to check its adjacent tiles
+            List<Tuple<int, int, bool>> queue = new List<Tuple<int, int, bool>>();
+
+            queue.Add(new Tuple<int, int, bool>(x, y, false));
+
+            _board[x, y].GetComponent<Tile>().Reveal();
+
+            while (queue.Count > 0)
+            {
+                // Dequeue the front node
+                Tuple<int, int, bool> curTile = queue.Last();
+                queue.RemoveAt(queue.Count - 1);
+                if (curTile.Item3) continue;
+
+                int posX = curTile.Item1;
+                int posY = curTile.Item2;
+
+                CheckAdjacentTile(posX + 1, posY, ref queue);
+                CheckAdjacentTile(posX - 1, posY, ref queue);
+                CheckAdjacentTile(posX, posY + 1, ref queue);
+                CheckAdjacentTile(posX, posY - 1, ref queue);
+            }
+        }
+
+        private void CheckAdjacentTile(int posX, int posY, ref List<Tuple<int, int, bool>> queue)
+        {
+            if (!IsTileValid(posX, posY)) return;
+            
+            Tile rightTile = _board[posX, posY].GetComponent<Tile>();
+            if (rightTile.Type != Tile.TileType.BOMB && !rightTile.IsRevealed)
+            {
+                _board[posX, posY].GetComponent<Tile>().Reveal();
+                queue.Add(new Tuple<int, int, bool>(posX, posY, rightTile.Type == Tile.TileType.CLUE));
+            } 
+        }
+
+        private static Game _instance;
+
         private const int WIDTH = 10;
         private const int HEIGHT = 10;
         private const int BOMBS_COUNT = 10;
@@ -50,6 +115,7 @@ namespace DefaultNamespace
 
                 _board[bombPos.x, bombPos.y] = InitTileGameObject(BOMB_PREFAB_NAME, bombPos.x, bombPos.y);
                 _board[bombPos.x, bombPos.y].GetComponent<Tile>().InitWithType(Tile.TileType.BOMB, BOMB_PREFAB_NAME);
+                _board[bombPos.x, bombPos.y].GetComponent<Tile>().Position = new Vector2Int(bombPos.x, bombPos.y);
             }
         }
 
@@ -68,6 +134,7 @@ namespace DefaultNamespace
 
                     _board[x, y] = InitTileGameObject(prefabName, x, y);
                     _board[x, y].GetComponent<Tile>().InitWithType(type, prefabName);
+                    _board[x, y].GetComponent<Tile>().Position = new Vector2Int(x, y);
                 }
             }
         }
@@ -108,5 +175,7 @@ namespace DefaultNamespace
 
             return tileGameObject;
         }
+
+        private bool IsTileValid(int x, int y) => (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT);
     }
 }

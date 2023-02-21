@@ -11,10 +11,25 @@ namespace DefaultNamespace
             CLUE,
             MASK
         }
+        
+        public TileType Type => _type;
+        
+        public bool IsRevealed => _isRevealed;
+
+        public Vector2Int Position
+        {
+            get => _position;
+            set => _position = value;
+        }
 
         private Sprite _defaultSprite;
         private Sprite _maskSprite;
 
+        private Vector2Int _position;
+
+        private TileType _type;
+        private bool _isRevealed;
+        
         public void InitWithType(TileType type, string path)
         {
             _type = type;
@@ -24,14 +39,12 @@ namespace DefaultNamespace
             GetComponent<SpriteRenderer>().sprite = _maskSprite;
         }
 
-
-        private TileType _type;
-
-        private void OnMouseDown()
+        public void Reveal()
         {
-           Reveal(); 
+            GetComponent<SpriteRenderer>().sprite = _defaultSprite;
+            _isRevealed = true;
         }
-        
-        private void Reveal() => GetComponent<SpriteRenderer>().sprite = _defaultSprite;
+
+        private void OnMouseDown() => Game.Instance.OnTileClicked(this);
     }
 }
