@@ -104,8 +104,8 @@ namespace DefaultNamespace
                     bombPos.x = Random.Range(0, WIDTH);
                     bombPos.y = Random.Range(0, HEIGHT);
                 } while (
-                    (_board[bombPos.x, bombPos.y].GetComponent<Tile>().Type == Tile.TileType.BOMB) ||
-                    (bombPos.x == forbiddenPos.x && bombPos.y == forbiddenPos.y)
+                    _board[bombPos.x, bombPos.y].GetComponent<Tile>().Type == Tile.TileType.BOMB ||
+                    IsAroundClickedTile(bombPos.x, bombPos.y, forbiddenPos.x, forbiddenPos.y)
                 );
 
                 _board[bombPos.x, bombPos.y].GetComponent<Tile>().InitWithType(Tile.TileType.BOMB, BOMB_PREFAB_NAME);
@@ -145,6 +145,21 @@ namespace DefaultNamespace
             }
 
             return count;
+        }
+        
+        private bool IsAroundClickedTile(int x, int y, int tileX, int tileY)
+        {
+            for (int i = tileX - 1; i <= tileX + 1; i++)
+            {
+                for (int j = tileY - 1; j <= tileY + 1; j++)
+                {
+                    if (i < 0 || i >= WIDTH || j < 0 || j >= HEIGHT) continue;
+
+                    if (i == x && j == y) return true;
+                }
+            }
+
+            return false;
         }
 
         private GameObject InitTileGameObject(string prefabName, int x, int y, int z = 0)
