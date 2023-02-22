@@ -15,7 +15,10 @@ namespace DefaultNamespace
 
         public void OnTileClicked(Tile tile)
         {
+            if (!gameStarted) HandleFirstClick();
+            
             if (tile.IsRevealed || tile.IsFlagged) return;
+            
             switch (tile.Type)
             {
                 case Tile.TileType.BOMB:
@@ -46,14 +49,26 @@ namespace DefaultNamespace
         private GameObject[,] _board;
 
         [SerializeField] private Transform cam;
+        
+        [SerializeField] private bool gameStarted;
 
         private void Start()
         {
             _board = new GameObject[WIDTH, HEIGHT];
+            gameStarted = false;
             InitCam();
             GenerateBoard();
-            GenerateBombs();
+        }
+
+        private void HandleFirstClick()
+        {
+            Vector3 tilePos = cam.GetComponent<Camera>().ScreenToWorldPoint(Input.mousePosition);
+            int x = (int) tilePos.x;
+            int y = (int) tilePos.y;
+            GenerateBombs(new Vector2Int(x, y));
+            
             GenerateCluesAndEmpty();
+            gameStarted = true;
         }
 
         private void HandleLoseCase()
@@ -80,7 +95,7 @@ namespace DefaultNamespace
             }
         }
 
-        private void GenerateBombs()
+        private void GenerateBombs(Vector2Int forbiddenPos)
         {
             (int x, int y) bombPos = (0, 0);
 
@@ -91,7 +106,8 @@ namespace DefaultNamespace
                     bombPos.x = Random.Range(0, WIDTH);
                     bombPos.y = Random.Range(0, HEIGHT);
                 } while (
-                    _board[bombPos.x, bombPos.y].GetComponent<Tile>().Type == Tile.TileType.BOMB
+                    (_board[bombPos.x, bombPos.y].GetComponent<Tile>().Type == Tile.TileType.BOMB) ||
+                    (bombPos.x == forbiddenPos.x && bombPos.y == forbiddenPos.y)
                 );
 
                 _board[bombPos.x, bombPos.y].GetComponent<Tile>().InitWithType(Tile.TileType.BOMB, BOMB_PREFAB_NAME);
@@ -126,10 +142,7 @@ namespace DefaultNamespace
                 {
                     if (i < 0 || i >= WIDTH || j < 0 || j >= HEIGHT) continue;
 
-                    if (_board[i, j] != null)
-                    {
-                        if (_board[i, j].GetComponent<Tile>().Type == Tile.TileType.BOMB) count++;
-                    }
+                    if (_board[i, j].GetComponent<Tile>().Type == Tile.TileType.BOMB) count++;
                 }
             }
 
