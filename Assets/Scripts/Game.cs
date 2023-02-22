@@ -15,7 +15,7 @@ namespace DefaultNamespace
 
         public void OnTileClicked(Tile tile)
         {
-            if (!gameStarted) HandleFirstClick();
+            if (!gameStarted) HandleFirstClick(tile);
             
             if (tile.IsRevealed || tile.IsFlagged) return;
             
@@ -48,7 +48,7 @@ namespace DefaultNamespace
 
         private GameObject[,] _board;
 
-        [SerializeField] private Transform cam;
+        [SerializeField] private Camera cam;
         
         [SerializeField] private bool gameStarted;
 
@@ -60,13 +60,10 @@ namespace DefaultNamespace
             GenerateBoard();
         }
 
-        private void HandleFirstClick()
+        private void HandleFirstClick(Tile tile)
         {
-            Vector3 tilePos = cam.GetComponent<Camera>().ScreenToWorldPoint(Input.mousePosition);
-            int x = (int) tilePos.x;
-            int y = (int) tilePos.y;
-            GenerateBombs(new Vector2Int(x, y));
-            
+            Debug.Log("Cliked on tile: " + tile.Position);
+            GenerateBombs(tile.Position);
             GenerateCluesAndEmpty();
             gameStarted = true;
         }
@@ -78,9 +75,9 @@ namespace DefaultNamespace
 
         private void InitCam()
         {
-            cam = Camera.main.transform;
+            cam = Camera.main;
             cam.transform.position = new Vector3(WIDTH * 0.5f - 0.5f, HEIGHT * 0.5f - 0.5f, -10);
-            cam.GetComponent<Camera>().orthographicSize = HEIGHT * 0.5f;
+            cam.orthographicSize = HEIGHT * 0.5f;
         }
 
         private void GenerateBoard()
@@ -91,6 +88,7 @@ namespace DefaultNamespace
                 {
                     _board[x, y] = InitTileGameObject(EMPTY_PREFAB_NAME, x, y);
                     _board[x, y].GetComponent<Tile>().Position = new Vector2Int(x, y);
+                    _board[x, y].GetComponent<Tile>().InitWithType(Tile.TileType.EMPTY, EMPTY_PREFAB_NAME);
                 }
             }
         }
@@ -156,12 +154,13 @@ namespace DefaultNamespace
             Quaternion rotation = Quaternion.identity;
 
             GameObject tileGameObject = Instantiate(original, position, rotation) as GameObject;
-            tileGameObject!.AddComponent<Tile>();
-            tileGameObject!.AddComponent<BoxCollider2D>();
+            if (tileGameObject == null) throw new Exception("tileGameObject is null with position : " + position);
+            
+            tileGameObject.AddComponent<Tile>();
+            tileGameObject.AddComponent<BoxCollider2D>();
+            tileGameObject.transform.parent = transform;
 
-            StringBuilder sb = new StringBuilder();
-            sb.Append(prefabName).Append("_").Append(x).Append("_").Append(y);
-            tileGameObject!.name = sb.ToString();
+            tileGameObject.name = new StringBuilder().Append(x).Append("_").Append(y).ToString();
 
             return tileGameObject;
         }
