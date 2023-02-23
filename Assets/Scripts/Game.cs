@@ -16,9 +16,9 @@ namespace DefaultNamespace
         public void OnTileClicked(Tile tile)
         {
             if (!gameStarted) HandleFirstClick(tile);
-            
+
             if (tile.IsRevealed || tile.IsFlagged) return;
-            
+
             switch (tile.Type)
             {
                 case Tile.TileType.BOMB:
@@ -43,13 +43,12 @@ namespace DefaultNamespace
         private const int BOMBS_COUNT = 25;
 
         private const string PREFAB_PATH = "Prefabs/";
-        private const string BOMB_PREFAB_NAME = "bomb";
-        private const string EMPTY_PREFAB_NAME = "empty";
+        private const string DEFAULT_PREFAB_NAME = "default_tile";
 
         private GameObject[,] _board;
 
         [SerializeField] private Camera cam;
-        
+
         [SerializeField] private bool gameStarted;
 
         private void Start()
@@ -62,7 +61,6 @@ namespace DefaultNamespace
 
         private void HandleFirstClick(Tile tile)
         {
-            Debug.Log("Cliked on tile: " + tile.Position);
             GenerateBombs(tile.Position);
             GenerateCluesAndEmpty();
             gameStarted = true;
@@ -76,6 +74,7 @@ namespace DefaultNamespace
         private void InitCam()
         {
             cam = Camera.main;
+            if (cam == null) throw new Exception("No camera found in scene!");
             cam.transform.position = new Vector3(WIDTH * 0.5f - 0.5f, HEIGHT * 0.5f - 0.5f, -10);
             cam.orthographicSize = HEIGHT * 0.5f;
         }
@@ -86,9 +85,9 @@ namespace DefaultNamespace
             {
                 for (int y = 0; y < HEIGHT; y++)
                 {
-                    _board[x, y] = InitTileGameObject(EMPTY_PREFAB_NAME, x, y);
+                    _board[x, y] = InitTileGameObject(DEFAULT_PREFAB_NAME, x, y);
                     _board[x, y].GetComponent<Tile>().Position = new Vector2Int(x, y);
-                    _board[x, y].GetComponent<Tile>().InitWithType(Tile.TileType.EMPTY, EMPTY_PREFAB_NAME);
+                    _board[x, y].GetComponent<Tile>().InitWithType(Tile.TileType.EMPTY);
                 }
             }
         }
@@ -108,7 +107,7 @@ namespace DefaultNamespace
                     IsAroundClickedTile(bombPos.x, bombPos.y, forbiddenPos.x, forbiddenPos.y)
                 );
 
-                _board[bombPos.x, bombPos.y].GetComponent<Tile>().InitWithType(Tile.TileType.BOMB, BOMB_PREFAB_NAME);
+                _board[bombPos.x, bombPos.y].GetComponent<Tile>().InitWithType(Tile.TileType.BOMB);
             }
         }
 
@@ -118,14 +117,13 @@ namespace DefaultNamespace
             {
                 for (int y = 0; y < HEIGHT; y++)
                 {
-                    if (_board[x, y].GetComponent<Tile>().Type == Tile.TileType.BOMB) continue;
+                    Tile tile = _board[x, y].GetComponent<Tile>();
 
-                    int bombsCount = GetBombsCountAround(x, y);
+                    if (tile.Type == Tile.TileType.BOMB) continue;
 
-                    string prefabName = bombsCount == 0 ? EMPTY_PREFAB_NAME : bombsCount.ToString();
-                    Tile.TileType type = bombsCount == 0 ? Tile.TileType.EMPTY : Tile.TileType.CLUE;
-
-                    _board[x, y].GetComponent<Tile>().InitWithType(type, prefabName);
+                    tile.ClueCount = GetBombsCountAround(x, y);
+                    Tile.TileType type = tile.ClueCount == 0 ? Tile.TileType.EMPTY : Tile.TileType.CLUE;
+                    tile.InitWithType(type);
                 }
             }
         }
@@ -146,7 +144,7 @@ namespace DefaultNamespace
 
             return count;
         }
-        
+
         private bool IsAroundClickedTile(int x, int y, int tileX, int tileY)
         {
             for (int i = tileX - 1; i <= tileX + 1; i++)
@@ -170,11 +168,10 @@ namespace DefaultNamespace
 
             GameObject tileGameObject = Instantiate(original, position, rotation) as GameObject;
             if (tileGameObject == null) throw new Exception("tileGameObject is null with position : " + position);
-            
+
             tileGameObject.AddComponent<Tile>();
             tileGameObject.AddComponent<BoxCollider2D>();
             tileGameObject.transform.parent = transform;
-
             tileGameObject.name = new StringBuilder().Append(x).Append("_").Append(y).ToString();
 
             return tileGameObject;
@@ -186,23 +183,26 @@ namespace DefaultNamespace
         {
             // List of all tiles to check, int x, int y and bool isClue.
             // Is the tile is a clue, we don't need to check its adjacent tiles
-            List<Tuple<int, int, bool>> queue = new List<Tuple<int, int, bool>>();
-
-            queue.Add(new Tuple<int, int, bool>(x, y, false));
-
-            Tile firstTile = _board[x, y].GetComponent<Tile>();
-            firstTile.Reveal();
+            List<Tuple<int, int, bool>> queue = new List<Tuple<int, int, bool>>() { new(x, y, false) };
+            
+            // Reveal the tile we clicked on
+            _board[x, y].GetComponent<Tile>().Reveal();
 
             while (queue.Count > 0)
             {
-                // Dequeue the front node
+                // Select the last tile in the queue and remove it from the queue
                 Tuple<int, int, bool> curTile = queue.Last();
                 queue.RemoveAt(queue.Count - 1);
+                
+                // If the tile is a clue, we don't need to check its adjacent tiles
+                // The algorithm will reveal all linked empty tiles and also the clue tiles that are directly linked to
+                // one of the revealed empty tiles
                 if (curTile.Item3) continue;
 
                 int posX = curTile.Item1;
                 int posY = curTile.Item2;
 
+                // Checks all adjacent tiles (top, bottom, left, right)
                 CheckAdjacentTile(posX + 1, posY, ref queue);
                 CheckAdjacentTile(posX - 1, posY, ref queue);
                 CheckAdjacentTile(posX, posY + 1, ref queue);

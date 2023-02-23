@@ -18,6 +18,8 @@ namespace DefaultNamespace
         public bool IsFlagged => _isFlagged;
 
         public Vector2Int Position { get; set; }
+        
+        public int ClueCount { get; set; }
 
         private Sprite _defaultSprite;
         private Sprite _maskSprite;
@@ -30,12 +32,14 @@ namespace DefaultNamespace
 
         private const string GRAPHICS_PATH = "Graphics/";
         private const string MASK_PREFAB_NAME = "mask";
-        private const string FLAG_PREFAB_NAME = "flag";
+        private const string EMPTY_SPRITE_NAME = "mask";
+        private const string FLAG_SPRITE_NAME = "flag";
+        private const string BOMB_SPRITE_NAME = "bomb";
 
-        public void InitWithType(TileType type, string path)
+        public void InitWithType(TileType type)
         {
             _type = type;
-            _defaultSprite = Resources.Load<Sprite>(GRAPHICS_PATH + path);
+            _defaultSprite = Resources.Load<Sprite>(GRAPHICS_PATH + GetCorrectPathNameFromType());
             _maskSprite = Resources.Load<Sprite>(GRAPHICS_PATH + MASK_PREFAB_NAME);
 
             GetComponent<SpriteRenderer>().sprite = _maskSprite;
@@ -47,15 +51,27 @@ namespace DefaultNamespace
             _isRevealed = true;
         }
 
-        private void OnMouseDown() => Game.Instance.OnTileClicked(this);
-
-        private void OnMouseOver()
+        public void OnLeftClickCallback() => Game.Instance.OnTileClicked(this);
+        
+        public void OnRightClickCallback()
         {
-            if (Input.GetMouseButton(1))
+            GetComponent<SpriteRenderer>().sprite =
+                _isFlagged ? _maskSprite : Resources.Load<Sprite>(GRAPHICS_PATH + FLAG_SPRITE_NAME);
+            _isFlagged = !_isFlagged; 
+        }
+
+        private string GetCorrectPathNameFromType()
+        {
+            switch (_type)
             {
-                GetComponent<SpriteRenderer>().sprite =
-                    _isFlagged ? _maskSprite : Resources.Load<Sprite>(GRAPHICS_PATH + FLAG_PREFAB_NAME);
-                _isFlagged = !_isFlagged;
+                case TileType.EMPTY:
+                    return EMPTY_SPRITE_NAME;
+                case TileType.BOMB:
+                    return BOMB_SPRITE_NAME;
+                case TileType.CLUE:
+                    return ClueCount.ToString();
+                default:
+                    throw new ArgumentException("Invalid TileType");
             }
         }
     }
