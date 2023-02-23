@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using UnityEngine;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
@@ -17,22 +16,13 @@ namespace DefaultNamespace
         {
             if (!gameStarted) HandleFirstClick(tile);
 
-            if (tile.IsRevealed || tile.IsFlagged) return;
+            if ((tile.IsRevealed && tile.Type != Tile.TileType.CLUE) || tile.IsFlagged) return;
 
             switch (tile.Type)
             {
-                case Tile.TileType.BOMB:
-                    Thread.Sleep(2000);
-                    tile.Reveal();
-                    HandleLoseCase();
-                    break;
-                case Tile.TileType.CLUE:
-                    tile.Reveal();
-                    break;
-                case Tile.TileType.EMPTY:
-                    var tilePos = tile.Position;
-                    FloodFill(tilePos.x, tilePos.y);
-                    break;
+                case Tile.TileType.BOMB: HandleBombTileReveal(tile); break;
+                case Tile.TileType.CLUE: HandleClueTileReveal(tile); break;
+                case Tile.TileType.EMPTY:HandleEmptyTileReveal(tile); break;
             }
         }
         
@@ -51,6 +41,8 @@ namespace DefaultNamespace
         private const string DEFAULT_PREFAB_NAME = "default_tile";
 
         private GameObject[,] _board;
+        private List<Vector2Int> _bombsPositions;
+        private List<Vector2Int> _flagPositions;
 
         [SerializeField] private Camera cam;
 
@@ -63,17 +55,12 @@ namespace DefaultNamespace
             InitCam();
             GenerateBoard();
         }
-
+        
         private void HandleFirstClick(Tile tile)
         {
             GenerateBombs(tile.Position);
             GenerateCluesAndEmpty();
             gameStarted = true;
-        }
-
-        private void HandleLoseCase()
-        {
-            Application.Quit();
         }
 
         private void InitCam()
@@ -103,6 +90,8 @@ namespace DefaultNamespace
 
             for (int i = 0; i < BOMBS_COUNT; i++)
             {
+                // We generate bombs coordinates until we find an empty spot. 
+                // The bomb coordinates are not allowed to be around / be first clicked tile coordinates.
                 do
                 {
                     bombPos.x = Random.Range(0, WIDTH);
@@ -113,6 +102,7 @@ namespace DefaultNamespace
                 );
 
                 _board[bombPos.x, bombPos.y].GetComponent<Tile>().InitWithType(Tile.TileType.BOMB);
+                //_bombsPositions.Add(new Vector2Int(bombPos.x, bombPos.y));
             }
         }
 
@@ -133,18 +123,29 @@ namespace DefaultNamespace
             }
         }
 
-        private int GetBombsCountAround(int x, int y)
+        private List<Tile> GetNeighbours(int x, int y)
         {
-            int count = 0;
-
+            List<Tile> neighbours = new List<Tile>();
             for (int i = x - 1; i <= x + 1; i++)
             {
                 for (int j = y - 1; j <= y + 1; j++)
                 {
-                    if (i < 0 || i >= WIDTH || j < 0 || j >= HEIGHT) continue;
+                    if (i < 0 || i >= WIDTH || j < 0 || j >= HEIGHT || (i == x && j == y)) continue;
 
-                    if (_board[i, j].GetComponent<Tile>().Type == Tile.TileType.BOMB) count++;
+                    neighbours.Add(_board[i, j].GetComponent<Tile>()); 
                 }
+            }
+            return neighbours;
+        }
+        
+        private int GetBombsCountAround(int x, int y)
+        {
+            int count = 0;
+
+            List<Tile> neighbours = GetNeighbours(x, y);
+            foreach (Tile neighbour in neighbours)
+            {
+                if (neighbour.Type == Tile.TileType.BOMB) count++;
             }
 
             return count;
@@ -184,14 +185,19 @@ namespace DefaultNamespace
 
         private bool IsTileValid(int x, int y) => (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT);
 
-        private void FloodFill(int x, int y)
+        private void HandleEmptyTileReveal(Tile tile)
         {
+            if (tile.IsRevealed) return;
+            
+            int x = tile.Position.x;
+            int y = tile.Position.y;
+            
             // List of all tiles to check, int x, int y and bool isClue.
-            // Is the tile is a clue, we don't need to check its adjacent tiles
+            // Is the tile is a clue, we don't need to check its adjacent tiles (Item3)
             List<Tuple<int, int, bool>> queue = new List<Tuple<int, int, bool>>() { new(x, y, false) };
             
             // Reveal the tile we clicked on
-            _board[x, y].GetComponent<Tile>().Reveal();
+            tile.Reveal();
 
             while (queue.Count > 0)
             {
@@ -200,14 +206,14 @@ namespace DefaultNamespace
                 queue.RemoveAt(queue.Count - 1);
                 
                 // If the tile is a clue, we don't need to check its adjacent tiles
-                // The algorithm will reveal all linked empty tiles and also the clue tiles that are directly linked to
-                // one of the revealed empty tiles
+                // The algorithm will reveal all linked empty tiles
+                // and also the clue tiles that are directly linked a revealed empty tile
                 if (curTile.Item3) continue;
 
                 int posX = curTile.Item1;
                 int posY = curTile.Item2;
 
-                // Checks all adjacent tiles (top, bottom, left, right)
+                // Checks all adjacent tiles (right, left, up, down)
                 CheckAdjacentTile(posX + 1, posY, ref queue);
                 CheckAdjacentTile(posX - 1, posY, ref queue);
                 CheckAdjacentTile(posX, posY + 1, ref queue);
@@ -217,14 +223,34 @@ namespace DefaultNamespace
 
         private void CheckAdjacentTile(int posX, int posY, ref List<Tuple<int, int, bool>> queue)
         {
+            // Prevent out of bounds checks that would throw an exception
             if (!IsTileValid(posX, posY)) return;
 
+            // If the tile is not a bomb and is not already revealed, we reveal it and add it to the queue
             Tile tile = _board[posX, posY].GetComponent<Tile>();
             if (tile.Type != Tile.TileType.BOMB && !tile.IsRevealed)
             {
                 tile.Reveal();
                 queue.Add(new Tuple<int, int, bool>(posX, posY, tile.Type == Tile.TileType.CLUE));
             }
+        }
+        
+        private void HandleClueTileReveal(Tile tile)
+        {
+            foreach (Tile neighbour in GetNeighbours(tile.Position.x, tile.Position.y))
+            {
+                switch (neighbour.Type)
+                {
+                    case Tile.TileType.BOMB: HandleBombTileReveal(neighbour); break;
+                    case Tile.TileType.CLUE: tile.Reveal(); break;
+                    case Tile.TileType.EMPTY: HandleEmptyTileReveal(neighbour); break;
+                }
+            }
+        }
+
+        private void HandleBombTileReveal(Tile tile)
+        {
+            if (!tile.IsFlagged) tile.Reveal(true);
         }
     }
 }
