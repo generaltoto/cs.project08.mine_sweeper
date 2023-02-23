@@ -13,7 +13,7 @@ namespace DefaultNamespace
     {
         public static Game Instance => _instance ??= FindObjectOfType<Game>();
 
-        public void OnTileClicked(Tile tile)
+        public void OnLeftClick(Tile tile)
         {
             if (!gameStarted) HandleFirstClick(tile);
 
@@ -34,6 +34,11 @@ namespace DefaultNamespace
                     FloodFill(tilePos.x, tilePos.y);
                     break;
             }
+        }
+        
+        public void OnRightClick(Tile tile)
+        {
+            if (!tile.IsRevealed) tile.ToggleFlag();
         }
 
         private static Game _instance;

@@ -24,13 +24,13 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "MiddleClick",
-                    "type": "Button",
-                    "id": "e94b2775-e8bf-42ba-8f98-8a77d9a7d990",
-                    "expectedControlType": "Button",
+                    "name": "Move",
+                    "type": "Value",
+                    "id": "7b68f61d-56ef-4684-9ccc-3ddb1b3fb3a7",
+                    "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -58,12 +58,12 @@
                 },
                 {
                     "name": "",
-                    "id": "ba684471-2911-41e1-98b3-922af90a0afa",
-                    "path": "<Mouse>/middleButton",
+                    "id": "e58b18c4-53e8-4517-a5a7-7286ea0322c7",
+                    "path": "<Mouse>/position",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "MiddleClick",
+                    "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

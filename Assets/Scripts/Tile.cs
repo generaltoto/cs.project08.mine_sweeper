@@ -32,9 +32,10 @@ namespace DefaultNamespace
 
         private const string GRAPHICS_PATH = "Graphics/";
         private const string MASK_PREFAB_NAME = "mask";
-        private const string EMPTY_SPRITE_NAME = "mask";
+        private const string EMPTY_SPRITE_NAME = "empty";
         private const string FLAG_SPRITE_NAME = "flag";
         private const string BOMB_SPRITE_NAME = "bomb";
+        private const string BOMB_EXPLODED_SPRITE_NAME = "bomb_exploded";
 
         public void InitWithType(TileType type)
         {
@@ -45,34 +46,34 @@ namespace DefaultNamespace
             GetComponent<SpriteRenderer>().sprite = _maskSprite;
         }
 
-        public void Reveal()
+        public void Reveal(bool isExploded = false)
         {
+            if (isExploded) _defaultSprite = Resources.Load<Sprite>(GRAPHICS_PATH + BOMB_EXPLODED_SPRITE_NAME);
+            
             GetComponent<SpriteRenderer>().sprite = _defaultSprite;
             _isRevealed = true;
         }
 
-        public void OnLeftClickCallback() => Game.Instance.OnTileClicked(this);
-        
-        public void OnRightClickCallback()
+        public void ToggleFlag()
         {
             GetComponent<SpriteRenderer>().sprite =
                 _isFlagged ? _maskSprite : Resources.Load<Sprite>(GRAPHICS_PATH + FLAG_SPRITE_NAME);
             _isFlagged = !_isFlagged; 
         }
 
+        public void OnLeftClickCallback() => Game.Instance.OnLeftClick(this);
+        
+        public void OnRightClickCallback() => Game.Instance.OnRightClick(this);
+
         private string GetCorrectPathNameFromType()
         {
-            switch (_type)
+            return _type switch
             {
-                case TileType.EMPTY:
-                    return EMPTY_SPRITE_NAME;
-                case TileType.BOMB:
-                    return BOMB_SPRITE_NAME;
-                case TileType.CLUE:
-                    return ClueCount.ToString();
-                default:
-                    throw new ArgumentException("Invalid TileType");
-            }
+                TileType.EMPTY => EMPTY_SPRITE_NAME,
+                TileType.BOMB => BOMB_SPRITE_NAME,
+                TileType.CLUE => ClueCount.ToString(),
+                _ => throw new ArgumentException("Invalid TileType")
+            };
         }
     }
 }

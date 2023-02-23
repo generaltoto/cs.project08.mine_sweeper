@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.Serialization;
 
 namespace DefaultNamespace
 {
@@ -8,20 +7,26 @@ namespace DefaultNamespace
     {
         [SerializeField] private UnityEvent leftClicked;
         [SerializeField] private UnityEvent rightClicked;
-        [SerializeField] private UnityEvent middleClicked;
         
+        private BoxCollider2D _boxCollider2D;
+
         private MouseInputProvider _mouseInputProvider;
-        
+
         private void Awake()
         {
             _mouseInputProvider = FindObjectOfType<MouseInputProvider>();
+            _boxCollider2D = GetComponent<BoxCollider2D>();
             _mouseInputProvider.LeftClicked += OnMouseLeftClick;
             _mouseInputProvider.RightClicked += OnMouseRightClick;
-            _mouseInputProvider.MiddleClicked += OnMouseMiddleClick;
         }
-        
-        private void OnMouseLeftClick() => leftClicked.Invoke();
-        private void OnMouseRightClick() => rightClicked.Invoke();
-        private void OnMouseMiddleClick() => middleClicked.Invoke();
+
+        private void OnMouseLeftClick()
+        {
+            if (_boxCollider2D.OverlapPoint(_mouseInputProvider.MousePosition)) leftClicked.Invoke();
+        }
+        private void OnMouseRightClick()
+        {
+            if (_boxCollider2D.OverlapPoint(_mouseInputProvider.MousePosition)) rightClicked.Invoke();
+        }
     }
 }

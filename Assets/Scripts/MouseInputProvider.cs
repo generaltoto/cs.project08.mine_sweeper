@@ -4,24 +4,14 @@ using UnityEngine.InputSystem;
 
 public class MouseInputProvider : MonoBehaviour
 {
+    public Vector2 MousePosition { get; private set; }
     public event Action LeftClicked;
 
     public event Action RightClicked;
     
-    public event Action MiddleClicked;
+    private void OnMove (InputValue input) => MousePosition = Camera.main.ScreenToWorldPoint(input.Get<Vector2>());
 
-    private void OnAction(InputValue input)
-    {
-        Debug.LogWarning("Entered OnAction");
-        
-        if (!input.isPressed) return;
-        
-        Debug.LogWarning("Mouse input detected");
+    private void OnLeftClick(InputValue input) => LeftClicked?.Invoke();
 
-        if (Mouse.current.leftButton.wasReleasedThisFrame) LeftClicked?.Invoke();
-        
-        else if (Mouse.current.rightButton.wasReleasedThisFrame) RightClicked?.Invoke();
-        
-        else if (Mouse.current.middleButton.wasReleasedThisFrame) MiddleClicked?.Invoke();
-    }
+    private void OnRightClick(InputValue input) => RightClicked?.Invoke();
 }
