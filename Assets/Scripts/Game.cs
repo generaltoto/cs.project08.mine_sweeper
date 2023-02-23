@@ -19,7 +19,7 @@ namespace DefaultNamespace
 
         [SerializeField] private Transform cam;
 
-        private void Start()
+        protected void Start()
         {
             _board = new GameObject[WIDTH, HEIGHT];
             InitCam();
