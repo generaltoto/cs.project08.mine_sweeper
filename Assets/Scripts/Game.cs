@@ -226,12 +226,16 @@ namespace DefaultNamespace
 
                 int posX = curTile.Item1;
                 int posY = curTile.Item2;
-
-                // Checks all adjacent tiles (right, left, up, down)
-                CheckAdjacentTile(posX + 1, posY, ref queue);
-                CheckAdjacentTile(posX - 1, posY, ref queue);
-                CheckAdjacentTile(posX, posY + 1, ref queue);
-                CheckAdjacentTile(posX, posY - 1, ref queue);
+                
+                foreach (Tile neighbour in GetNeighbours(posX, posY))
+                {
+                    // If the tile is not a bomb and is not already revealed, we reveal it and add it to the queue
+                    if (neighbour.Type != Tile.TileType.BOMB && !neighbour.IsRevealed)
+                    {
+                        neighbour.Reveal();
+                        queue.Add(new Tuple<int, int, bool>(neighbour.Position.x, neighbour.Position.y, neighbour.Type == Tile.TileType.CLUE));
+                    }
+                }
             }
         }
 
