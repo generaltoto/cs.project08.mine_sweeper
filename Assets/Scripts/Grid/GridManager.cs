@@ -11,7 +11,7 @@ namespace Grid
     public class GridManager : MonoBehaviour
     {
         public static GridManager Instance => _instance ??= FindObjectOfType<GridManager>();
-        
+
         public List<Vector2Int> FlagPositions => _flagPositions;
         
         public List<Vector2Int> BombsPositions => _bombsPositions;
@@ -21,7 +21,7 @@ namespace Grid
             _width = width;
             _height = height;
             _bombsCount = bombsCount;
-            _board = new GameObject[width, height];
+            _board = new Tile[width, height];
             _bombsPositions = new List<Vector2Int>();
             _flagPositions = new List<Vector2Int>();
         }
@@ -32,9 +32,9 @@ namespace Grid
             {
                 for (int y = 0; y < _height; y++)
                 {
-                    _board[x, y] = InitTileGameObject(DEFAULT_PREFAB_NAME, x, y);
-                    _board[x, y].GetComponent<Tile>().Position = new Vector2Int(x, y);
-                    _board[x, y].GetComponent<Tile>().InitWithType(Tile.TileType.EMPTY);
+                    _board[x, y] = CreateTileFromPrefab(DEFAULT_PREFAB_NAME, x, y);
+                    _board[x, y].Position = new Vector2Int(x, y);
+                    _board[x, y].InitWithType(Tile.TileType.EMPTY);
                 }
             }
         }
@@ -52,11 +52,11 @@ namespace Grid
                     bombPos.x = Random.Range(0, _width);
                     bombPos.y = Random.Range(0, _height);
                 } while (
-                    _board[bombPos.x, bombPos.y].GetComponent<Tile>().Type == Tile.TileType.BOMB ||
+                    _board[bombPos.x, bombPos.y].Type == Tile.TileType.BOMB ||
                     IsAroundClickedTile(bombPos.x, bombPos.y, forbiddenPos.x, forbiddenPos.y)
                 );
 
-                _board[bombPos.x, bombPos.y].GetComponent<Tile>().InitWithType(Tile.TileType.BOMB);
+                _board[bombPos.x, bombPos.y].InitWithType(Tile.TileType.BOMB);
                 _bombsPositions.Add(new Vector2Int(bombPos.x, bombPos.y));
             }
         }
@@ -67,7 +67,7 @@ namespace Grid
             {
                 for (int y = 0; y < _height; y++)
                 {
-                    Tile tile = _board[x, y].GetComponent<Tile>();
+                    Tile tile = _board[x, y];
 
                     if (tile.Type == Tile.TileType.BOMB) continue;
 
@@ -144,6 +144,12 @@ namespace Grid
         public void HandleBombTileReveal(Tile tile)
         {
             if (!tile.IsFlagged) tile.Reveal(true);
+            
+            foreach (Vector2Int bombPos in _bombsPositions)
+            {
+                Tile bombTile = _board[bombPos.x, bombPos.y];
+                if (!bombTile.IsFlagged) bombTile.Reveal();
+            }
         }
 
 
@@ -155,7 +161,7 @@ namespace Grid
         private int _width;
         private int _height;
         private int _bombsCount;
-        private GameObject[,] _board;
+        private Tile[,] _board;
         private List<Vector2Int> _bombsPositions;
         private List<Vector2Int> _flagPositions;
 
@@ -166,9 +172,9 @@ namespace Grid
             {
                 for (int j = y - 1; j <= y + 1; j++)
                 {
-                    if (i < 0 || i >= _width || j < 0 || j >= _height || (i == x && j == y)) continue;
+                    if (TileIsInvalid(i, j) || (i == x && j == y)) continue;
 
-                    neighbours.Add(_board[i, j].GetComponent<Tile>());
+                    neighbours.Add(_board[i, j]);
                 }
             }
 
@@ -178,12 +184,7 @@ namespace Grid
         private int GetBombsCountAround(int x, int y)
         {
             int count = 0;
-
-            List<Tile> neighbours = GetNeighbours(x, y);
-            foreach (Tile neighbour in neighbours)
-            {
-                if (neighbour.Type == Tile.TileType.BOMB) count++;
-            }
+            GetNeighbours(x, y).ForEach(neighbour => { if (neighbour.Type == Tile.TileType.BOMB) count++; });
 
             return count;
         }
@@ -194,7 +195,7 @@ namespace Grid
             {
                 for (int j = tileY - 1; j <= tileY + 1; j++)
                 {
-                    if (i < 0 || i >= _width || j < 0 || j >= _height) continue;
+                    if (TileIsInvalid(i, j)) continue;
 
                     if (i == x && j == y) return true;
                 }
@@ -202,18 +203,18 @@ namespace Grid
 
             return false;
         }
+
+        private bool TileIsInvalid(int x, int y) => (x < 0 || x >= _width || y < 0 || y >= _height);
         
-        private GameObject InitTileGameObject(string prefabName, int x, int y, int z = 0)
+        private Tile CreateTileFromPrefab(string prefabName, int x, int y, int z = 0)
         {
-            Object original = Resources.Load(PREFAB_PATH + prefabName);
+            Tile original = Resources.Load<Tile>(PREFAB_PATH + prefabName);
             Vector3 position = new Vector3(x, y, z);
             Quaternion rotation = Quaternion.identity;
 
-            GameObject tileGameObject = Instantiate(original, position, rotation) as GameObject;
+            Tile tileGameObject = Instantiate(original, position, rotation);
             if (tileGameObject == null) throw new Exception("tileGameObject is null with position : " + position);
 
-            tileGameObject.AddComponent<Tile>();
-            tileGameObject.AddComponent<BoxCollider2D>();
             tileGameObject.transform.parent = transform;
             tileGameObject.name = new StringBuilder().Append(x).Append("_").Append(y).ToString();
 
