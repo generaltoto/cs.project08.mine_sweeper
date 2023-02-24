@@ -218,7 +218,7 @@ GameObject:
   - component: {fileID: 982527313}
   - component: {fileID: 982527314}
   m_Layer: 0
-  m_Name: BoardManager
+  m_Name: GameManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -251,6 +251,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: adb15ac20479496d9c00c6d0df004d48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _bombsPositions: []
+  _flagPositions: []
   cam: {fileID: 0}
   gameStarted: 0
 --- !u!1 &1476970896
