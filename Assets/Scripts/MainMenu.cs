@@ -19,8 +19,22 @@ namespace DefaultNamespace
         }  
         public void SetDifficulty()
         {
-            SceneManager.LoadScene(2);
+            int value = 0;
 
+            switch (value)
+            {
+                case 1:
+                    SceneManager.LoadScene(2);
+                    break;
+
+                case 2:
+                    SceneManager.LoadScene(1);
+                    break;   
+                
+                case 3:
+                    SceneManager.LoadScene(1);
+                    break;
+            }
         }
     }
 }
