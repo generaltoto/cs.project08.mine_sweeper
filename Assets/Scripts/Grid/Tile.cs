@@ -1,7 +1,9 @@
 ﻿using System;
+using DefaultNamespace;
+using JetBrains.Annotations;
 using UnityEngine;
 
-namespace DefaultNamespace
+namespace Grid
 {
     public class Tile : MonoBehaviour
     {
@@ -18,11 +20,13 @@ namespace DefaultNamespace
         public bool IsFlagged => _isFlagged;
 
         public Vector2Int Position { get; set; }
-        
+
         public int ClueCount { get; set; }
 
+        private SpriteRenderer _spriteRenderer;
         private Sprite _defaultSprite;
-        private Sprite _maskSprite;
+        private Sprite _maskSprite, _flagSprite;
+        [CanBeNull] private Sprite _bombExplodedSprite;
 
         private Vector2Int _position;
 
@@ -40,30 +44,35 @@ namespace DefaultNamespace
         public void InitWithType(TileType type)
         {
             _type = type;
-            _defaultSprite = Resources.Load<Sprite>(GRAPHICS_PATH + GetCorrectPathNameFromType());
-            _maskSprite = Resources.Load<Sprite>(GRAPHICS_PATH + MASK_PREFAB_NAME);
 
-            GetComponent<SpriteRenderer>().sprite = _maskSprite;
+            _defaultSprite = Resources.Load<Sprite>(GRAPHICS_PATH + GetCorrectPathNameFromType());
+
+            _maskSprite = Resources.Load<Sprite>(GRAPHICS_PATH + MASK_PREFAB_NAME);
+            _flagSprite = Resources.Load<Sprite>(GRAPHICS_PATH + FLAG_SPRITE_NAME);
+
+            _bombExplodedSprite = type == TileType.BOMB
+                ? Resources.Load<Sprite>(GRAPHICS_PATH + BOMB_EXPLODED_SPRITE_NAME)
+                : null;
+
+            _spriteRenderer = GetComponent<SpriteRenderer>();
+            _spriteRenderer.sprite = _maskSprite;
         }
 
         public void Reveal(bool isExploded = false)
         {
-            if (isExploded) _defaultSprite = Resources.Load<Sprite>(GRAPHICS_PATH + BOMB_EXPLODED_SPRITE_NAME);
-            
-            GetComponent<SpriteRenderer>().sprite = _defaultSprite;
+            _spriteRenderer.sprite = !isExploded ? _defaultSprite : _bombExplodedSprite;
             _isRevealed = true;
         }
 
         public void ToggleFlag()
         {
-            GetComponent<SpriteRenderer>().sprite =
-                _isFlagged ? _maskSprite : Resources.Load<Sprite>(GRAPHICS_PATH + FLAG_SPRITE_NAME);
-            _isFlagged = !_isFlagged; 
+            _spriteRenderer.sprite = _isFlagged ? _maskSprite : _flagSprite;
+            _isFlagged = !_isFlagged;
         }
 
-        public void OnLeftClickCallback() => Game.Instance.OnLeftClick(this);
-        
-        public void OnRightClickCallback() => Game.Instance.OnRightClick(this);
+        public void OnLeftClickCallback() => GameManager.Instance.OnLeftClick(this);
+
+        public void OnRightClickCallback() => GameManager.Instance.OnRightClick(this);
 
         private string GetCorrectPathNameFromType()
         {
