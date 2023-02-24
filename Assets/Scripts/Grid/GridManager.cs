@@ -13,7 +13,7 @@ namespace Grid
         public static GridManager Instance => _instance ??= FindObjectOfType<GridManager>();
 
         public List<Vector2Int> FlagPositions => _flagPositions;
-        
+
         public List<Vector2Int> BombsPositions => _bombsPositions;
 
         public void Init(int width, int height, int bombsCount)
@@ -77,7 +77,7 @@ namespace Grid
                 }
             }
         }
-        
+
         public void HandleEmptyTileReveal(Tile tile)
         {
             int x = tile.Position.x;
@@ -144,7 +144,7 @@ namespace Grid
         public void HandleBombTileReveal(Tile tile)
         {
             if (!tile.IsFlagged) tile.Reveal(true);
-            
+
             foreach (Vector2Int bombPos in _bombsPositions)
             {
                 Tile bombTile = _board[bombPos.x, bombPos.y];
@@ -184,28 +184,19 @@ namespace Grid
         private int GetBombsCountAround(int x, int y)
         {
             int count = 0;
-            GetNeighbours(x, y).ForEach(neighbour => { if (neighbour.Type == Tile.TileType.BOMB) count++; });
+            GetNeighbours(x, y).ForEach(neighbour =>
+            {
+                if (neighbour.Type == Tile.TileType.BOMB) count++;
+            });
 
             return count;
         }
 
         private bool IsAroundClickedTile(int x, int y, int tileX, int tileY)
-        {
-            for (int i = tileX - 1; i <= tileX + 1; i++)
-            {
-                for (int j = tileY - 1; j <= tileY + 1; j++)
-                {
-                    if (TileIsInvalid(i, j)) continue;
-
-                    if (i == x && j == y) return true;
-                }
-            }
-
-            return false;
-        }
+            => GetNeighbours(tileX, tileY).Exists(neighbour => neighbour.Position.x == x && neighbour.Position.y == y);
 
         private bool TileIsInvalid(int x, int y) => (x < 0 || x >= _width || y < 0 || y >= _height);
-        
+
         private Tile CreateTileFromPrefab(string prefabName, int x, int y, int z = 0)
         {
             Tile original = Resources.Load<Tile>(PREFAB_PATH + prefabName);
