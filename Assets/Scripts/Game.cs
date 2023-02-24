@@ -24,18 +24,28 @@ namespace DefaultNamespace
                 case Tile.TileType.CLUE: HandleClueTileReveal(tile); break;
                 case Tile.TileType.EMPTY:HandleEmptyTileReveal(tile); break;
             }
+
+            bool gameOver = CheckIfGameOver();
+            if (gameOver) HandleWin();
         }
         
         public void OnRightClick(Tile tile)
         {
-            if (!tile.IsRevealed) tile.ToggleFlag();
+            if (!tile.IsRevealed)
+            {
+                tile.ToggleFlag();
+                _flagPositions.Add(tile.Position);
+            }
+            
+            bool gameOver = CheckIfGameOver();
+            if (gameOver) HandleWin();
         }
 
         private static Game _instance;
 
         private const int WIDTH = 15;
         private const int HEIGHT = 10;
-        private const int BOMBS_COUNT = 25;
+        private const int BOMBS_COUNT = 3;
 
         private const string PREFAB_PATH = "Prefabs/";
         private const string DEFAULT_PREFAB_NAME = "default_tile";
@@ -51,6 +61,9 @@ namespace DefaultNamespace
         private void Start()
         {
             _board = new GameObject[WIDTH, HEIGHT];
+            _bombsPositions = new List<Vector2Int>();
+            _flagPositions = new List<Vector2Int>();
+            
             gameStarted = false;
             InitCam();
             GenerateBoard();
@@ -61,6 +74,11 @@ namespace DefaultNamespace
             GenerateBombs(tile.Position);
             GenerateCluesAndEmpty();
             gameStarted = true;
+        }
+        
+        private void HandleWin()
+        {
+            Debug.Log("You won!");
         }
 
         private void InitCam()
@@ -102,7 +120,7 @@ namespace DefaultNamespace
                 );
 
                 _board[bombPos.x, bombPos.y].GetComponent<Tile>().InitWithType(Tile.TileType.BOMB);
-                //_bombsPositions.Add(new Vector2Int(bombPos.x, bombPos.y));
+                _bombsPositions.Add(new Vector2Int(bombPos.x, bombPos.y));
             }
         }
 
@@ -182,13 +200,9 @@ namespace DefaultNamespace
 
             return tileGameObject;
         }
-
-        private bool IsTileValid(int x, int y) => (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT);
-
+        
         private void HandleEmptyTileReveal(Tile tile)
         {
-            if (tile.IsRevealed) return;
-            
             int x = tile.Position.x;
             int y = tile.Position.y;
             
@@ -221,36 +235,40 @@ namespace DefaultNamespace
             }
         }
 
-        private void CheckAdjacentTile(int posX, int posY, ref List<Tuple<int, int, bool>> queue)
-        {
-            // Prevent out of bounds checks that would throw an exception
-            if (!IsTileValid(posX, posY)) return;
-
-            // If the tile is not a bomb and is not already revealed, we reveal it and add it to the queue
-            Tile tile = _board[posX, posY].GetComponent<Tile>();
-            if (tile.Type != Tile.TileType.BOMB && !tile.IsRevealed)
-            {
-                tile.Reveal();
-                queue.Add(new Tuple<int, int, bool>(posX, posY, tile.Type == Tile.TileType.CLUE));
-            }
-        }
-        
         private void HandleClueTileReveal(Tile tile)
         {
-            foreach (Tile neighbour in GetNeighbours(tile.Position.x, tile.Position.y))
+            if (tile.IsRevealed)
             {
-                switch (neighbour.Type)
+                foreach (Tile neighbour in GetNeighbours(tile.Position.x, tile.Position.y))
                 {
-                    case Tile.TileType.BOMB: HandleBombTileReveal(neighbour); break;
-                    case Tile.TileType.CLUE: tile.Reveal(); break;
-                    case Tile.TileType.EMPTY: HandleEmptyTileReveal(neighbour); break;
+                    Debug.Log(tile.Type);
+                    switch (neighbour.Type)
+                    {
+                        case Tile.TileType.BOMB: HandleBombTileReveal(neighbour); break;
+                        case Tile.TileType.CLUE: neighbour.Reveal(); break;
+                        case Tile.TileType.EMPTY: HandleEmptyTileReveal(neighbour); break;
+                    }
                 }
             }
+            else tile.Reveal();
         }
 
         private void HandleBombTileReveal(Tile tile)
         {
             if (!tile.IsFlagged) tile.Reveal(true);
+        }
+
+        private bool CheckIfGameOver()
+        {
+            if (_flagPositions.Count != _bombsPositions.Count) return false;
+            
+            foreach (Vector2Int flagPos in _flagPositions)
+            {
+                if (_bombsPositions.Contains(flagPos)) continue;
+                return false;
+            }
+
+            return true;
         }
     }
 }
