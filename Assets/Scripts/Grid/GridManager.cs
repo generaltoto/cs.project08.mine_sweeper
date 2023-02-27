@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
 
 namespace Grid
@@ -107,12 +106,10 @@ namespace Grid
                 foreach (Tile neighbour in GetNeighbours(posX, posY))
                 {
                     // If the tile is not a bomb and is not already revealed, we reveal it and add it to the queue
-                    if (neighbour.Type != Tile.TileType.BOMB && !neighbour.IsRevealed)
-                    {
-                        neighbour.Reveal();
-                        queue.Add(new Tuple<int, int, bool>(neighbour.Position.x, neighbour.Position.y,
-                            neighbour.Type == Tile.TileType.CLUE));
-                    }
+                    if (neighbour.Type == Tile.TileType.BOMB || neighbour.IsRevealed) continue;
+                    neighbour.Reveal();
+                    queue.Add(new Tuple<int, int, bool>(neighbour.Position.x, neighbour.Position.y,
+                        neighbour.Type == Tile.TileType.CLUE));
                 }
             }
         }
@@ -181,16 +178,8 @@ namespace Grid
             return neighbours;
         }
 
-        private int GetBombsCountAround(int x, int y)
-        {
-            int count = 0;
-            GetNeighbours(x, y).ForEach(neighbour =>
-            {
-                if (neighbour.Type == Tile.TileType.BOMB) count++;
-            });
-
-            return count;
-        }
+        private int GetBombsCountAround(int x, int y) =>
+            GetNeighbours(x, y).Count(neighbour => neighbour.Type == Tile.TileType.BOMB);
 
         private bool IsAroundClickedTile(int x, int y, int tileX, int tileY)
             => GetNeighbours(tileX, tileY).Exists(neighbour => neighbour.Position.x == x && neighbour.Position.y == y);
