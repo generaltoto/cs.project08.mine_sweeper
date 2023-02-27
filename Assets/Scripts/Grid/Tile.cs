@@ -25,7 +25,7 @@ namespace Grid
 
         private SpriteRenderer _spriteRenderer;
         private Sprite _defaultSprite;
-        private Sprite _maskSprite, _flagSprite;
+        private Sprite _maskSprite, _flagSprite, _wrongFlagSprite;
         [CanBeNull] private Sprite _bombExplodedSprite;
 
         private Vector2Int _position;
@@ -38,6 +38,7 @@ namespace Grid
         private const string MASK_PREFAB_NAME = "mask";
         private const string EMPTY_SPRITE_NAME = "empty";
         private const string FLAG_SPRITE_NAME = "flag";
+        private const string WRONG_FLAG_SPRITE_NAME = "bomb_wrong";
         private const string BOMB_SPRITE_NAME = "bomb";
         private const string BOMB_EXPLODED_SPRITE_NAME = "bomb_exploded";
 
@@ -49,8 +50,9 @@ namespace Grid
 
             _maskSprite = Resources.Load<Sprite>(GRAPHICS_PATH + MASK_PREFAB_NAME);
             _flagSprite = Resources.Load<Sprite>(GRAPHICS_PATH + FLAG_SPRITE_NAME);
+            _wrongFlagSprite = Resources.Load<Sprite>(GRAPHICS_PATH + WRONG_FLAG_SPRITE_NAME);
 
-            _bombExplodedSprite = type == TileType.BOMB
+            _bombExplodedSprite = (type == TileType.BOMB)
                 ? Resources.Load<Sprite>(GRAPHICS_PATH + BOMB_EXPLODED_SPRITE_NAME)
                 : null;
 
@@ -58,9 +60,18 @@ namespace Grid
             _spriteRenderer.sprite = _maskSprite;
         }
 
-        public void Reveal(bool isExploded = false)
+        public void Reveal()
         {
-            _spriteRenderer.sprite = !isExploded ? _defaultSprite : _bombExplodedSprite;
+            _spriteRenderer.sprite = _defaultSprite;
+            _isRevealed = true;
+        }
+        
+        public void Reveal(bool isExploded, bool wasFlagged)
+        {
+            if (isExploded) _spriteRenderer.sprite = _bombExplodedSprite;
+            else if (wasFlagged && Type != TileType.BOMB) _spriteRenderer.sprite = _wrongFlagSprite;
+            else _spriteRenderer.sprite = _defaultSprite;
+            
             _isRevealed = true;
         }
 

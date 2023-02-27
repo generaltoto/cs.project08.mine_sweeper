@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using UnityEngine.UI;
-using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
-using UnityEngine.SceneManagement;
 
 namespace Grid
 {
@@ -109,12 +106,10 @@ namespace Grid
                 foreach (Tile neighbour in GetNeighbours(posX, posY))
                 {
                     // If the tile is not a bomb and is not already revealed, we reveal it and add it to the queue
-                    if (neighbour.Type != Tile.TileType.BOMB && !neighbour.IsRevealed)
-                    {
-                        neighbour.Reveal();
-                        queue.Add(new Tuple<int, int, bool>(neighbour.Position.x, neighbour.Position.y,
-                            neighbour.Type == Tile.TileType.CLUE));
-                    }
+                    if (neighbour.Type == Tile.TileType.BOMB || neighbour.IsRevealed) continue;
+                    neighbour.Reveal();
+                    queue.Add(new Tuple<int, int, bool>(neighbour.Position.x, neighbour.Position.y,
+                        neighbour.Type == Tile.TileType.CLUE));
                 }
             }
         }
@@ -125,7 +120,6 @@ namespace Grid
             {
                 foreach (Tile neighbour in GetNeighbours(tile.Position.x, tile.Position.y))
                 {
-                    Debug.Log(tile.Type);
                     switch (neighbour.Type)
                     {
                         case Tile.TileType.BOMB:
@@ -145,13 +139,15 @@ namespace Grid
 
         public void HandleBombTileReveal(Tile tile)
         {
-            if (!tile.IsFlagged) tile.Reveal(true);
+            if (!tile.IsFlagged) tile.Reveal(true, false);
 
-            foreach (Vector2Int bombPos in _bombsPositions)
-            {
-                Tile bombTile = _board[bombPos.x, bombPos.y];
-                if (!bombTile.IsFlagged) bombTile.Reveal();
-            }
+            _flagPositions
+                .ForEach(tilePos => _board[tilePos.x, tilePos.y].Reveal(false, true));
+
+            _bombsPositions
+                .Where(tilePos => _board[tilePos.x, tilePos.y].IsRevealed == false)
+                .ToList()
+                .ForEach(tilePos => _board[tilePos.x, tilePos.y].Reveal(false, false));
         }
 
 
@@ -166,6 +162,11 @@ namespace Grid
         private Tile[,] _board;
         private List<Vector2Int> _bombsPositions;
         private List<Vector2Int> _flagPositions;
+
+        private void Awake()
+        {
+            if (_instance == null) _instance = this;
+        }
 
         private List<Tile> GetNeighbours(int x, int y)
         {
@@ -183,16 +184,8 @@ namespace Grid
             return neighbours;
         }
 
-        private int GetBombsCountAround(int x, int y)
-        {
-            int count = 0;
-            GetNeighbours(x, y).ForEach(neighbour =>
-            {
-                if (neighbour.Type == Tile.TileType.BOMB) count++;
-            });
-
-            return count;
-        }
+        private int GetBombsCountAround(int x, int y) =>
+            GetNeighbours(x, y).Count(neighbour => neighbour.Type == Tile.TileType.BOMB);
 
         private bool IsAroundClickedTile(int x, int y, int tileX, int tileY)
             => GetNeighbours(tileX, tileY).Exists(neighbour => neighbour.Position.x == x && neighbour.Position.y == y);

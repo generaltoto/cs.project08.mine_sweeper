@@ -1,8 +1,8 @@
 ﻿using System;
 using Grid;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace DefaultNamespace
 {
@@ -18,9 +18,15 @@ namespace DefaultNamespace
 
             switch (tile.Type)
             {
-                case Tile.TileType.BOMB: GridManager.Instance.HandleBombTileReveal(tile); break;
-                case Tile.TileType.CLUE: GridManager.Instance.HandleClueTileReveal(tile); break;
-                case Tile.TileType.EMPTY: GridManager.Instance.HandleEmptyTileReveal(tile); break;
+                case Tile.TileType.BOMB:
+                    GridManager.Instance.HandleBombTileReveal(tile);
+                    break;
+                case Tile.TileType.CLUE:
+                    GridManager.Instance.HandleClueTileReveal(tile);
+                    break;
+                case Tile.TileType.EMPTY:
+                    GridManager.Instance.HandleEmptyTileReveal(tile);
+                    break;
             }
 
             bool gameOver = CheckIfGameOver();
@@ -39,20 +45,18 @@ namespace DefaultNamespace
             if (gameOver) HandleWin();
         }
 
-        private static GameManager _instance;
-
-
-        [SerializeField] private Camera cam;
-
-        [SerializeField] private bool gameStarted;
-
-        private void StartGame(int width, int height)
+        public void StartGame(int width, int height)
         {
-            int bomb_count = width * height / 5;
-            gameStarted = false;
-            InitCam(width, height);
-            GridManager.Instance.Init(width, height, bomb_count);
-            GridManager.Instance.GenerateBoard();
+            SceneManager.LoadSceneAsync(GAME_SCENE_INDEX).completed += _ =>
+            {
+                gameStarted = false;
+
+                InitCam(width, height);
+                int bombCount = (int)(width * height * 0.125);
+                GridManager.Instance.Init(width, height, bombCount);
+
+                GridManager.Instance.GenerateBoard();
+            };
         }
 
         public void SetDifficulty()
@@ -61,19 +65,38 @@ namespace DefaultNamespace
 
             switch (value)
             {
-                case 1:
-                    StartGame(15, 10);
-                    break;
-
-                case 2:
-                    StartGame(20, 20);
-                    break;
-
-                case 3:
-                    StartGame(30, 30);
-                    break;
+                case 1: StartGame(15, 10); break;
+                case 2: StartGame(20, 20); break;
+                case 3: StartGame(30, 30); break;
             }
         }
+        
+        private static GameManager _instance;
+
+        [SerializeField] private Camera cam;
+
+        [SerializeField] private bool gameStarted;
+        
+        private const int MAIN_MENU_SCENE_INDEX = 0;
+        private const int GAME_SCENE_INDEX = 1;
+        
+        private void Awake()
+        {
+            if (_instance != null && _instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            _instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+        
+        private void Start()
+        {
+            SceneManager.LoadScene(MAIN_MENU_SCENE_INDEX);
+        }
+
         private void HandleFirstClick(Tile tile)
         {
             GridManager.Instance.GenerateBombs(tile.Position);
@@ -88,10 +111,8 @@ namespace DefaultNamespace
 
         private void InitCam(int w, int h)
         {
-            cam = Camera.main;
-            if (cam == null) throw new Exception("No camera found in scene!");
-            cam.transform.position = new Vector3(w * 0.5f - 0.5f, h * 0.5f - 0.5f, -10);
-            cam.orthographicSize = (w < h) ? h * 0.5f : w * 0.5f;
+            Camera.main!.transform.position = new Vector3(w * 0.5f - 0.5f, h * 0.5f - 0.5f, -10);
+            Camera.main.orthographicSize = (w < h) ? h * 0.5f : w * 0.5f;
         }
 
         private bool CheckIfGameOver()
