@@ -41,21 +41,20 @@ namespace DefaultNamespace
 
         private static GameManager _instance;
 
-        private const int WIDTH = 15;
-        private const int HEIGHT = 10;
-        private const int BOMBS_COUNT = 3;
 
         [SerializeField] private Camera cam;
 
         [SerializeField] private bool gameStarted;
 
-        private void Start()
+        private void StartGame(int width, int height)
         {
+            int bomb_count = width * height / 5;
             gameStarted = false;
-            InitCam();
-            GridManager.Instance.Init(WIDTH, HEIGHT, BOMBS_COUNT);
+            InitCam(width, height);
+            GridManager.Instance.Init(width, height, bomb_count);
             GridManager.Instance.GenerateBoard();
         }
+
         public void SetDifficulty()
         {
             int value = GetComponent<Dropdown>().value;
@@ -63,19 +62,15 @@ namespace DefaultNamespace
             switch (value)
             {
                 case 1:
-                    GridManager.Instance.Init(15, 10, BOMBS_COUNT);
-                    GridManager.Instance.GenerateBoard();
-
+                    StartGame(15, 10);
                     break;
 
                 case 2:
-                    GridManager.Instance.Init(20, 20, BOMBS_COUNT);
-                    GridManager.Instance.GenerateBoard();
+                    StartGame(20, 20);
                     break;
 
                 case 3:
-                    GridManager.Instance.Init(30, 30, BOMBS_COUNT);
-                    GridManager.Instance.GenerateBoard();
+                    StartGame(30, 30);
                     break;
             }
         }
@@ -91,12 +86,12 @@ namespace DefaultNamespace
             Debug.Log("You won!");
         }
 
-        private void InitCam()
+        private void InitCam(int w, int h)
         {
             cam = Camera.main;
             if (cam == null) throw new Exception("No camera found in scene!");
-            cam.transform.position = new Vector3(WIDTH * 0.5f - 0.5f, HEIGHT * 0.5f - 0.5f, -10);
-            cam.orthographicSize = HEIGHT * 0.5f;
+            cam.transform.position = new Vector3(w * 0.5f - 0.5f, h * 0.5f - 0.5f, -10);
+            cam.orthographicSize = (w < h) ? h * 0.5f : w * 0.5f;
         }
 
         private bool CheckIfGameOver()

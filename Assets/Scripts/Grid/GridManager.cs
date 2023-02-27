@@ -28,26 +28,6 @@ namespace Grid
             _flagPositions = new List<Vector2Int>();
         }
 
-/*        public void SetDifficulty()
-        {
-            int value = GetComponent<Dropdown>().value;
-
-            switch (value)
-            {
-                case 1:
-                    SceneManager.LoadScene(1);
-                    break;
-
-                case 2:
-                    Init(20,20,_bombsCount);
-                    break;
-
-                case 3:
-                    //_board = new GameObject[30, 30];
-                    break;
-            }
-        }*/
-
         public void GenerateBoard()
         {
             for (int x = 0; x < _width; x++)
