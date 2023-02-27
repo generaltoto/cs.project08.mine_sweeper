@@ -120,7 +120,6 @@ namespace Grid
             {
                 foreach (Tile neighbour in GetNeighbours(tile.Position.x, tile.Position.y))
                 {
-                    Debug.Log(tile.Type);
                     switch (neighbour.Type)
                     {
                         case Tile.TileType.BOMB:
@@ -140,13 +139,15 @@ namespace Grid
 
         public void HandleBombTileReveal(Tile tile)
         {
-            if (!tile.IsFlagged) tile.Reveal(true);
-
-            foreach (Vector2Int bombPos in _bombsPositions)
-            {
-                Tile bombTile = _board[bombPos.x, bombPos.y];
-                if (!bombTile.IsFlagged) bombTile.Reveal();
-            }
+            if (!tile.IsFlagged) tile.Reveal(true, false);
+            
+            _flagPositions
+                .ForEach(tilePos => _board[tilePos.x, tilePos.y].Reveal(false, true));
+            
+            _bombsPositions
+                .Where(tilePos => _board[tilePos.x, tilePos.y].IsRevealed == false)
+                .ToList()
+                .ForEach(tilePos => _board[tilePos.x, tilePos.y].Reveal(false, false));
         }
 
 
