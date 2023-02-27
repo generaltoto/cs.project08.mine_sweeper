@@ -1,6 +1,8 @@
 ﻿using System;
 using Grid;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 namespace DefaultNamespace
 {
@@ -54,7 +56,29 @@ namespace DefaultNamespace
             GridManager.Instance.Init(WIDTH, HEIGHT, BOMBS_COUNT);
             GridManager.Instance.GenerateBoard();
         }
+        public void SetDifficulty()
+        {
+            int value = GetComponent<Dropdown>().value;
 
+            switch (value)
+            {
+                case 1:
+                    GridManager.Instance.Init(15, 10, BOMBS_COUNT);
+                    GridManager.Instance.GenerateBoard();
+
+                    break;
+
+                case 2:
+                    GridManager.Instance.Init(20, 20, BOMBS_COUNT);
+                    GridManager.Instance.GenerateBoard();
+                    break;
+
+                case 3:
+                    GridManager.Instance.Init(30, 30, BOMBS_COUNT);
+                    GridManager.Instance.GenerateBoard();
+                    break;
+            }
+        }
         private void HandleFirstClick(Tile tile)
         {
             GridManager.Instance.GenerateBombs(tile.Position);

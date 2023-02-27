@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using UnityEngine.UI;
 using Object = UnityEngine.Object;
 using Random = UnityEngine.Random;
+using UnityEngine.SceneManagement;
 
 namespace Grid
 {
@@ -25,6 +27,26 @@ namespace Grid
             _bombsPositions = new List<Vector2Int>();
             _flagPositions = new List<Vector2Int>();
         }
+
+/*        public void SetDifficulty()
+        {
+            int value = GetComponent<Dropdown>().value;
+
+            switch (value)
+            {
+                case 1:
+                    SceneManager.LoadScene(1);
+                    break;
+
+                case 2:
+                    Init(20,20,_bombsCount);
+                    break;
+
+                case 3:
+                    //_board = new GameObject[30, 30];
+                    break;
+            }
+        }*/
 
         public void GenerateBoard()
         {
