@@ -9,7 +9,7 @@ namespace DefaultNamespace
     public class Game : MonoBehaviour
     {
         private const int WIDTH = 10;
-        private const int HEIGHT = 10;
+        private const int HEIGHT = 10; 
         private const int BOMBS_COUNT = 10;
 
         private const string PREFAB_PATH = "Prefabs/";
@@ -30,25 +30,6 @@ namespace DefaultNamespace
             GenerateCluesAndEmpty();
         }
 
-        public void SetDifficulty()
-        {
-            int value = GetComponent<Dropdown>().value;
-
-            switch (value)
-            {
-                case 1:
-                    SceneManager.LoadScene(1);
-                    break;
-
-                case 2:
-                    _board = new GameObject[20, 20];
-                    break;
-
-                case 3:
-                    _board = new GameObject[30, 30];
-                    break;
-            }
-        }
         private void InitCam()
         {
             cam = Camera.main.transform;

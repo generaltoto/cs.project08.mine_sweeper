@@ -17,26 +17,6 @@ namespace DefaultNamespace
         {
             Application.Quit();
         }
-        public void ChooseDifficulty()
-        {
-
-            int value = GetComponent<Dropdown>().value;
-
-            switch (value)
-            {
-                case 1:
-                    SceneManager.LoadScene(2);
-                    break;
-
-                case 2:
-                    SceneManager.LoadScene(1);
-                    break;
-
-                case 3:
-                    SceneManager.LoadScene(2);
-                    break;
-            }
-        }
     }
 }
 
