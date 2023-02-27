@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 
 namespace DefaultNamespace
 {
-    public class MainMenu: MonoBehaviour
+    public class MainMenu : MonoBehaviour
     {
         public void LoadGame()
         {
@@ -16,10 +16,11 @@ namespace DefaultNamespace
         public void EndGame()
         {
             Application.Quit();
-        }  
-        public void SetDifficulty()
+        }
+        public void ChooseDifficulty()
         {
-            int value = 0;
+
+            int value = GetComponent<Dropdown>().value;
 
             switch (value)
             {
@@ -29,10 +30,10 @@ namespace DefaultNamespace
 
                 case 2:
                     SceneManager.LoadScene(1);
-                    break;   
-                
+                    break;
+
                 case 3:
-                    SceneManager.LoadScene(1);
+                    SceneManager.LoadScene(2);
                     break;
             }
         }

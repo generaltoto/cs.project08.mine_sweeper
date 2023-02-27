@@ -1,5 +1,8 @@
 ﻿using System.Text;
 using UnityEngine;
+using UnityEngine.UI;
+using System.Collections;
+using UnityEngine.SceneManagement;
 
 namespace DefaultNamespace
 {
@@ -19,7 +22,7 @@ namespace DefaultNamespace
 
         [SerializeField] private Transform cam;
 
-        protected void Start()
+        private void Start()
         {
             _board = new GameObject[WIDTH, HEIGHT];
             InitCam();
@@ -27,6 +30,25 @@ namespace DefaultNamespace
             GenerateCluesAndEmpty();
         }
 
+        public void SetDifficulty()
+        {
+            int value = GetComponent<Dropdown>().value;
+
+            switch (value)
+            {
+                case 1:
+                    SceneManager.LoadScene(1);
+                    break;
+
+                case 2:
+                    _board = new GameObject[20, 20];
+                    break;
+
+                case 3:
+                    _board = new GameObject[30, 30];
+                    break;
+            }
+        }
         private void InitCam()
         {
             cam = Camera.main.transform;
