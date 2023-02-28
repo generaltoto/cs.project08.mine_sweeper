@@ -48,6 +48,7 @@ namespace Grid
                 // The bomb coordinates are not allowed to be around / be first clicked tile coordinates.
                 do
                 {
+                    // TODO : find a better random generation. e.g : int random = Random.Range(0, _width * _height - 1);
                     bombPos.x = Random.Range(0, _width);
                     bombPos.y = Random.Range(0, _height);
                 } while (
@@ -188,7 +189,11 @@ namespace Grid
             GetNeighbours(x, y).Count(neighbour => neighbour.Type == Tile.TileType.BOMB);
 
         private bool IsAroundClickedTile(int x, int y, int tileX, int tileY)
-            => GetNeighbours(tileX, tileY).Exists(neighbour => neighbour.Position.x == x && neighbour.Position.y == y);
+        {
+            var neighbours = GetNeighbours(tileX, tileY);
+            neighbours.Add(_board[tileX, tileY]);
+            return neighbours.Exists(neighbour => neighbour.Position.x == x && neighbour.Position.y == y);
+        }
 
         private bool TileIsInvalid(int x, int y) => (x < 0 || x >= _width || y < 0 || y >= _height);
 

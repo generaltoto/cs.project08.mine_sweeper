@@ -4,45 +4,40 @@ using UnityEngine.UI;
 using System.Collections;
 using UnityEngine.SceneManagement;
 
-
 namespace DefaultNamespace
 {
     public class MainMenu : MonoBehaviour
     {
-        public void LoadGame() => GameManager.Instance.StartGame(_width, _height);
+        public void LoadGame()
+        {
+            if (width > 0 && height > 0) GameManager.Instance.StartGame(width, height);
+        }
         public void EndGame() => Application.Quit();
 
         public void UpdateValueFromDropdown()
         {
-            int value = GetComponent<Dropdown>().value;
-            switch (value)
+            switch (GetComponent<Dropdown>().value)
             {
                 case 0:
-                    _width = DEFAULT_WIDTH;
-                    _height = DEFAULT_HEIGHT;
-                    break;
                 case 1:
-                    _width = (int)(DEFAULT_WIDTH * 1.5);
-                    _height = (int)(DEFAULT_HEIGHT * 1.5) + 5;
+                    width = DEFAULT_WIDTH;
+                    height = DEFAULT_HEIGHT;
                     break;
                 case 2:
-                    _width = (int)(DEFAULT_WIDTH * 2.5);
-                    _height = (int)(DEFAULT_HEIGHT * 2.5) + 8;
+                    width = (int)Math.Floor(DEFAULT_WIDTH * 1.5);
+                    height = (int)Math.Floor(DEFAULT_HEIGHT * 1.5) + 5;
+                    break;
+                case 3:
+                    width = (int)Math.Floor(DEFAULT_WIDTH * 2.5);
+                    height = (int)Math.Floor(DEFAULT_HEIGHT * 2.5) + 8;
                     break;
             }
         }
 
-        private void Awake()
-        {
-            _width = DEFAULT_WIDTH;
-            _height = DEFAULT_HEIGHT;
-        }
+        [SerializeField] private int width;
+        [SerializeField] private int height;
 
-        private int _width;
-        private int _height;
-        
         private const int DEFAULT_WIDTH = 9;
         private const int DEFAULT_HEIGHT = 9;
     }
 }
-

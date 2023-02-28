@@ -542,7 +542,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: adb15ac20479496d9c00c6d0df004d48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cam: {fileID: 0}
   gameStarted: 0
 --- !u!114 &337796457
 MonoBehaviour:
@@ -1954,6 +1953,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72ca73d2a8db60f43bf5b4f55e373fa6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  width: 0
+  height: 0
 --- !u!114 &1185582311
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2134,6 +2135,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72ca73d2a8db60f43bf5b4f55e373fa6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  width: 0
+  height: 0
 --- !u!1 &1398920995
 GameObject:
   m_ObjectHideFlags: 0
@@ -2331,7 +2334,6 @@ GameObject:
   - component: {fileID: 1461929425}
   - component: {fileID: 1461929424}
   - component: {fileID: 1461929427}
-  - component: {fileID: 1461929428}
   m_Layer: 5
   m_Name: Play
   m_TagString: Untagged
@@ -2445,7 +2447,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1461929428}
+      - m_Target: {fileID: 1958544531}
         m_TargetAssemblyTypeName: DefaultNamespace.MainMenu, Assembly-CSharp
         m_MethodName: LoadGame
         m_Mode: 1
@@ -2457,18 +2459,6 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
---- !u!114 &1461929428
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1461929422}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 72ca73d2a8db60f43bf5b4f55e373fa6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1768604716
 GameObject:
   m_ObjectHideFlags: 0
@@ -2764,7 +2754,7 @@ MonoBehaviour:
       - m_Target: {fileID: 1958544531}
         m_TargetAssemblyTypeName: DefaultNamespace.MainMenu, Assembly-CSharp
         m_MethodName: UpdateValueFromDropdown
-        m_Mode: 3
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -2824,6 +2814,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 72ca73d2a8db60f43bf5b4f55e373fa6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  width: 0
+  height: 0
 --- !u!1 &2053135580
 GameObject:
   m_ObjectHideFlags: 0
@@ -3052,6 +3044,10 @@ PrefabInstance:
     - target: {fileID: 6718202531929836460, guid: e74533b9f8798cd4a94730122830a6d7, type: 3}
       propertyPath: m_Name
       value: GameManager
+      objectReference: {fileID: 0}
+    - target: {fileID: 6718202531929836465, guid: e74533b9f8798cd4a94730122830a6d7, type: 3}
+      propertyPath: gameStarted
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6718202531929836466, guid: e74533b9f8798cd4a94730122830a6d7, type: 3}
       propertyPath: m_RootOrder
