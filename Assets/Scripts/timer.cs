@@ -6,12 +6,13 @@ using UnityEngine.UI;
 
 public class timer : MonoBehaviour
 {
-    float timer_game ;
-    public GameObject timerTxt;
-  
-    void Update()
+    private float timer_game ;
+    [SerializeField] private TMP_Text timerTxt;
+
+    private void Update()
     {
-        timerTxt.GetComponent<TMP_Text>().text = string.Format("{0:00} : {1:00}", Mathf.Floor(timer_game / 60), timer_game % 60);
+        // ReSharper disable HeapView.BoxingAllocation
+        timerTxt.text = string.Format("{0:00} : {1:00}", Mathf.Floor(timer_game / 60), timer_game % 60);
         timer_game = Time.time;
     }
 }
