@@ -11,6 +11,10 @@ namespace DefaultNamespace
     {
         public static GameManager Instance => _instance ??= FindObjectOfType<GameManager>();
 
+        public AudioSource Audio;
+        public AudioClip sound;
+
+
         public void OnLeftClick(Tile tile)
         {
             if (!gameStarted) HandleFirstClick(tile);
@@ -21,6 +25,7 @@ namespace DefaultNamespace
             {
                 case Tile.TileType.BOMB:
                     GridManager.Instance.HandleBombTileReveal(tile);
+                    Audio.PlayOneShot(sound);
                     break;
                 case Tile.TileType.CLUE:
                     GridManager.Instance.HandleClueTileReveal(tile);

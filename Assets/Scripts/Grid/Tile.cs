@@ -13,7 +13,6 @@ namespace Grid
             BOMB,
             CLUE,
         }
-
         public TileType Type => _type;
 
         public bool IsRevealed => _isRevealed;
