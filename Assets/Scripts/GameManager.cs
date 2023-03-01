@@ -11,10 +11,6 @@ namespace DefaultNamespace
     {
         public static GameManager Instance => _instance ??= FindObjectOfType<GameManager>();
 
-        public AudioSource Audio;
-        public AudioClip sound;
-
-
         public void OnLeftClick(Tile tile)
         {
             if (!gameStarted) HandleFirstClick(tile);
@@ -25,7 +21,7 @@ namespace DefaultNamespace
             {
                 case Tile.TileType.BOMB:
                     GridManager.Instance.HandleBombTileReveal(tile);
-                    Audio.PlayOneShot(sound);
+                    audioSource.PlayOneShot(sound);
                     break;
                 case Tile.TileType.CLUE:
                     GridManager.Instance.HandleClueTileReveal(tile);
@@ -105,6 +101,9 @@ namespace DefaultNamespace
         private const int MAIN_MENU_SCENE_INDEX = 0;
         private const int GAME_SCENE_INDEX = 1;
         private const int UI_SCENE_INDEX = 2;
+        
+        [SerializeField] private AudioSource audioSource;
+        [SerializeField] private AudioClip sound;
 
         private void Awake()
         {
