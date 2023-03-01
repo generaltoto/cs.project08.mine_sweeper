@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -58,10 +59,10 @@ namespace Grid
                     randomIndex = Random.Range(0, tilesPositions.Count);
                     position = tilesPositions[randomIndex];
                 } while (IsAroundClickedTile(position.x, position.y, forbiddenPos.x, forbiddenPos.y));
-                
+
                 // Init the tile at the final position as a bomb
                 _board[position.x, position.y].InitWithType(Tile.TileType.BOMB);
-                
+
                 // Remove the position from the list of available positions and add it to the list of bombs positions
                 tilesPositions.RemoveAt(randomIndex);
                 BombsPositions.Add(position);
@@ -156,6 +157,9 @@ namespace Grid
                 .Where(tilePos => _board[tilePos.x, tilePos.y].IsRevealed == false)
                 .ToList()
                 .ForEach(tilePos => _board[tilePos.x, tilePos.y].Reveal(false, false));
+
+            // ReSharper disable once HeapView.ObjectAllocation
+            StartCoroutine(HandleTilesFadeOut());
         }
 
 
@@ -219,6 +223,31 @@ namespace Grid
             tileGameObject.name = new StringBuilder().Append(x).Append("_").Append(y).ToString();
 
             return tileGameObject;
+        }
+
+        private IEnumerator HandleTilesFadeOut()
+        {
+            // Get all tiles positions
+            List<Vector2Int> tilesPositions = GetAllTilesPositions();
+
+            while (tilesPositions.Count > 0)
+            {
+                // Get a random tile position
+                int randomIndex = Random.Range(0, tilesPositions.Count);
+                Vector2Int position = tilesPositions[randomIndex];
+
+                // Get the tile at the random position
+                Tile tile = _board[position.x, position.y];
+
+                // Remove the position from the list of available positions
+                tilesPositions.RemoveAt(randomIndex);
+
+                // Fade out the tile
+                tile.FadeOut();
+                
+                // Add a little delay between each tile fade out
+                yield return new WaitForSeconds(0.0015f);
+            }
         }
     }
 }

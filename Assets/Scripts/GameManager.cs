@@ -59,19 +59,15 @@ namespace DefaultNamespace
         {
             SceneManager.LoadSceneAsync(GAME_SCENE_INDEX, LoadSceneMode.Additive).completed += _ =>
             {
-                SceneManager.UnloadSceneAsync(MAIN_MENU_SCENE_INDEX).completed += _ =>
-                {
-                    InitCam(width, height);
-                };
+                SceneManager.UnloadSceneAsync(MAIN_MENU_SCENE_INDEX).completed += _ => { InitCam(width, height); };
                 gameStarted = false;
 
                 int bombCount = (int)(width * height * 0.2);
                 GridManager.Instance.Init(width, height, bombCount);
 
                 GridManager.Instance.GenerateBoard();
-                
+
                 SceneManager.LoadScene(UI_SCENE_INDEX, LoadSceneMode.Additive);
-                
             };
         }
 
@@ -132,7 +128,7 @@ namespace DefaultNamespace
 
         private void InitCam(int w, int h)
         {
-            UnityEngine.Camera mainCam = UnityEngine.Camera.main!;
+            Camera mainCam = Camera.main!;
             mainCam.transform.position = new Vector3(w * 0.5f - 0.5f, h * 0.5f - 0.5f, -10);
             mainCam.orthographicSize = h * 0.5f + 5f;
         }
