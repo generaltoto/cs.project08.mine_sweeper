@@ -2,7 +2,7 @@
     "name": "GameInputActions",
     "maps": [
         {
-            "name": "Player",
+            "name": "PlayerInputs",
             "id": "65e36f6a-b463-4456-b187-1049039e70ea",
             "actions": [
                 {
@@ -64,6 +64,54 @@
                     "processors": "",
                     "groups": "",
                     "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "PlayerInputsCamera",
+            "id": "39156f0a-847f-4428-96c7-c51a6b1f69e8",
+            "actions": [
+                {
+                    "name": "Drag",
+                    "type": "Button",
+                    "id": "b3a096fe-9dba-429c-8462-31fc7e006942",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Zoom",
+                    "type": "PassThrough",
+                    "id": "d2884454-6861-4dab-a026-6351b4410bbc",
+                    "expectedControlType": "Axis",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "dacc7290-6947-4d09-96ee-073b2b103d0b",
+                    "path": "<Mouse>/scroll/y",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Zoom",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "db98ce04-b5b3-48d9-8375-9367445beaf6",
+                    "path": "<Mouse>/middleButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Drag",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

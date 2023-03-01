@@ -29,6 +29,8 @@ namespace DefaultNamespace
                 case Tile.TileType.EMPTY:
                     GridManager.Instance.HandleEmptyTileReveal(tile);
                     break;
+                default:
+                    throw new Exception($"Tile {tile.Position} type was not recognized");
             }
 
             bool gameOver = CheckIfGameOver();
@@ -37,20 +39,18 @@ namespace DefaultNamespace
 
         public void OnRightClick(Tile tile)
         {
-            if (!tile.IsRevealed)
+            if (tile.IsRevealed) return;
+            switch (tile.IsFlagged)
             {
-                switch (tile.IsFlagged)
-                {
-                    case true:
-                        GridManager.Instance.FlagPositions.Remove(tile.Position);
-                        break;
-                    case false:
-                        GridManager.Instance.FlagPositions.Add(tile.Position);
-                        break;
-                }
-
-                tile.ToggleFlag();
+                case true:
+                    GridManager.Instance.FlagPositions.Remove(tile.Position);
+                    break;
+                case false:
+                    GridManager.Instance.FlagPositions.Add(tile.Position);
+                    break;
             }
+
+            tile.ToggleFlag();
 
             bool gameOver = CheckIfGameOver();
             if (gameOver) HandleWin();
@@ -60,19 +60,15 @@ namespace DefaultNamespace
         {
             SceneManager.LoadSceneAsync(GAME_SCENE_INDEX, LoadSceneMode.Additive).completed += _ =>
             {
-                SceneManager.UnloadSceneAsync(MAIN_MENU_SCENE_INDEX).completed += _ =>
-                {
-                    InitCam(width, height);
-                };
+                SceneManager.UnloadSceneAsync(MAIN_MENU_SCENE_INDEX).completed += _ => { InitCam(width, height); };
                 gameStarted = false;
 
                 int bombCount = (int)(width * height * 0.2);
                 GridManager.Instance.Init(width, height, bombCount);
 
                 GridManager.Instance.GenerateBoard();
-                
+
                 SceneManager.LoadScene(UI_SCENE_INDEX, LoadSceneMode.Additive);
-                
             };
         }
 
