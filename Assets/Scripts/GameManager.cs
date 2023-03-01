@@ -132,7 +132,7 @@ namespace DefaultNamespace
 
         private void InitCam(int w, int h)
         {
-            Camera mainCam = Camera.main!;
+            UnityEngine.Camera mainCam = UnityEngine.Camera.main!;
             mainCam.transform.position = new Vector3(w * 0.5f - 0.5f, h * 0.5f - 0.5f, -10);
             mainCam.orthographicSize = h * 0.5f + 5f;
         }

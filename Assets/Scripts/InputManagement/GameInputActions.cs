@@ -24,7 +24,7 @@ public partial class @GameInputActions : IInputActionCollection2, IDisposable
     ""name"": ""GameInputActions"",
     ""maps"": [
         {
-            ""name"": ""Player"",
+            ""name"": ""PlayerInputs"",
             ""id"": ""65e36f6a-b463-4456-b187-1049039e70ea"",
             ""actions"": [
                 {
@@ -90,15 +90,67 @@ public partial class @GameInputActions : IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""PlayerInputsCamera"",
+            ""id"": ""39156f0a-847f-4428-96c7-c51a6b1f69e8"",
+            ""actions"": [
+                {
+                    ""name"": ""Drag"",
+                    ""type"": ""Button"",
+                    ""id"": ""b3a096fe-9dba-429c-8462-31fc7e006942"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Zoom"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""d2884454-6861-4dab-a026-6351b4410bbc"",
+                    ""expectedControlType"": ""Axis"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""dacc7290-6947-4d09-96ee-073b2b103d0b"",
+                    ""path"": ""<Mouse>/scroll/y"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Zoom"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""db98ce04-b5b3-48d9-8375-9367445beaf6"",
+                    ""path"": ""<Mouse>/middleButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Drag"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
 }");
-        // Player
-        m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
-        m_Player_LeftClick = m_Player.FindAction("LeftClick", throwIfNotFound: true);
-        m_Player_RightClick = m_Player.FindAction("RightClick", throwIfNotFound: true);
-        m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
+        // PlayerInputs
+        m_PlayerInputs = asset.FindActionMap("PlayerInputs", throwIfNotFound: true);
+        m_PlayerInputs_LeftClick = m_PlayerInputs.FindAction("LeftClick", throwIfNotFound: true);
+        m_PlayerInputs_RightClick = m_PlayerInputs.FindAction("RightClick", throwIfNotFound: true);
+        m_PlayerInputs_Move = m_PlayerInputs.FindAction("Move", throwIfNotFound: true);
+        // PlayerInputsCamera
+        m_PlayerInputsCamera = asset.FindActionMap("PlayerInputsCamera", throwIfNotFound: true);
+        m_PlayerInputsCamera_Drag = m_PlayerInputsCamera.FindAction("Drag", throwIfNotFound: true);
+        m_PlayerInputsCamera_Zoom = m_PlayerInputsCamera.FindAction("Zoom", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -155,39 +207,39 @@ public partial class @GameInputActions : IInputActionCollection2, IDisposable
         return asset.FindBinding(bindingMask, out action);
     }
 
-    // Player
-    private readonly InputActionMap m_Player;
-    private IPlayerActions m_PlayerActionsCallbackInterface;
-    private readonly InputAction m_Player_LeftClick;
-    private readonly InputAction m_Player_RightClick;
-    private readonly InputAction m_Player_Move;
-    public struct PlayerActions
+    // PlayerInputs
+    private readonly InputActionMap m_PlayerInputs;
+    private IPlayerInputsActions m_PlayerInputsActionsCallbackInterface;
+    private readonly InputAction m_PlayerInputs_LeftClick;
+    private readonly InputAction m_PlayerInputs_RightClick;
+    private readonly InputAction m_PlayerInputs_Move;
+    public struct PlayerInputsActions
     {
         private @GameInputActions m_Wrapper;
-        public PlayerActions(@GameInputActions wrapper) { m_Wrapper = wrapper; }
-        public InputAction @LeftClick => m_Wrapper.m_Player_LeftClick;
-        public InputAction @RightClick => m_Wrapper.m_Player_RightClick;
-        public InputAction @Move => m_Wrapper.m_Player_Move;
-        public InputActionMap Get() { return m_Wrapper.m_Player; }
+        public PlayerInputsActions(@GameInputActions wrapper) { m_Wrapper = wrapper; }
+        public InputAction @LeftClick => m_Wrapper.m_PlayerInputs_LeftClick;
+        public InputAction @RightClick => m_Wrapper.m_PlayerInputs_RightClick;
+        public InputAction @Move => m_Wrapper.m_PlayerInputs_Move;
+        public InputActionMap Get() { return m_Wrapper.m_PlayerInputs; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
         public bool enabled => Get().enabled;
-        public static implicit operator InputActionMap(PlayerActions set) { return set.Get(); }
-        public void SetCallbacks(IPlayerActions instance)
+        public static implicit operator InputActionMap(PlayerInputsActions set) { return set.Get(); }
+        public void SetCallbacks(IPlayerInputsActions instance)
         {
-            if (m_Wrapper.m_PlayerActionsCallbackInterface != null)
+            if (m_Wrapper.m_PlayerInputsActionsCallbackInterface != null)
             {
-                @LeftClick.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnLeftClick;
-                @LeftClick.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnLeftClick;
-                @LeftClick.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnLeftClick;
-                @RightClick.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnRightClick;
-                @RightClick.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnRightClick;
-                @RightClick.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnRightClick;
-                @Move.started -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMove;
-                @Move.performed -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMove;
-                @Move.canceled -= m_Wrapper.m_PlayerActionsCallbackInterface.OnMove;
+                @LeftClick.started -= m_Wrapper.m_PlayerInputsActionsCallbackInterface.OnLeftClick;
+                @LeftClick.performed -= m_Wrapper.m_PlayerInputsActionsCallbackInterface.OnLeftClick;
+                @LeftClick.canceled -= m_Wrapper.m_PlayerInputsActionsCallbackInterface.OnLeftClick;
+                @RightClick.started -= m_Wrapper.m_PlayerInputsActionsCallbackInterface.OnRightClick;
+                @RightClick.performed -= m_Wrapper.m_PlayerInputsActionsCallbackInterface.OnRightClick;
+                @RightClick.canceled -= m_Wrapper.m_PlayerInputsActionsCallbackInterface.OnRightClick;
+                @Move.started -= m_Wrapper.m_PlayerInputsActionsCallbackInterface.OnMove;
+                @Move.performed -= m_Wrapper.m_PlayerInputsActionsCallbackInterface.OnMove;
+                @Move.canceled -= m_Wrapper.m_PlayerInputsActionsCallbackInterface.OnMove;
             }
-            m_Wrapper.m_PlayerActionsCallbackInterface = instance;
+            m_Wrapper.m_PlayerInputsActionsCallbackInterface = instance;
             if (instance != null)
             {
                 @LeftClick.started += instance.OnLeftClick;
@@ -202,11 +254,57 @@ public partial class @GameInputActions : IInputActionCollection2, IDisposable
             }
         }
     }
-    public PlayerActions @Player => new PlayerActions(this);
-    public interface IPlayerActions
+    public PlayerInputsActions @PlayerInputs => new PlayerInputsActions(this);
+
+    // PlayerInputsCamera
+    private readonly InputActionMap m_PlayerInputsCamera;
+    private IPlayerInputsCameraActions m_PlayerInputsCameraActionsCallbackInterface;
+    private readonly InputAction m_PlayerInputsCamera_Drag;
+    private readonly InputAction m_PlayerInputsCamera_Zoom;
+    public struct PlayerInputsCameraActions
+    {
+        private @GameInputActions m_Wrapper;
+        public PlayerInputsCameraActions(@GameInputActions wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Drag => m_Wrapper.m_PlayerInputsCamera_Drag;
+        public InputAction @Zoom => m_Wrapper.m_PlayerInputsCamera_Zoom;
+        public InputActionMap Get() { return m_Wrapper.m_PlayerInputsCamera; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(PlayerInputsCameraActions set) { return set.Get(); }
+        public void SetCallbacks(IPlayerInputsCameraActions instance)
+        {
+            if (m_Wrapper.m_PlayerInputsCameraActionsCallbackInterface != null)
+            {
+                @Drag.started -= m_Wrapper.m_PlayerInputsCameraActionsCallbackInterface.OnDrag;
+                @Drag.performed -= m_Wrapper.m_PlayerInputsCameraActionsCallbackInterface.OnDrag;
+                @Drag.canceled -= m_Wrapper.m_PlayerInputsCameraActionsCallbackInterface.OnDrag;
+                @Zoom.started -= m_Wrapper.m_PlayerInputsCameraActionsCallbackInterface.OnZoom;
+                @Zoom.performed -= m_Wrapper.m_PlayerInputsCameraActionsCallbackInterface.OnZoom;
+                @Zoom.canceled -= m_Wrapper.m_PlayerInputsCameraActionsCallbackInterface.OnZoom;
+            }
+            m_Wrapper.m_PlayerInputsCameraActionsCallbackInterface = instance;
+            if (instance != null)
+            {
+                @Drag.started += instance.OnDrag;
+                @Drag.performed += instance.OnDrag;
+                @Drag.canceled += instance.OnDrag;
+                @Zoom.started += instance.OnZoom;
+                @Zoom.performed += instance.OnZoom;
+                @Zoom.canceled += instance.OnZoom;
+            }
+        }
+    }
+    public PlayerInputsCameraActions @PlayerInputsCamera => new PlayerInputsCameraActions(this);
+    public interface IPlayerInputsActions
     {
         void OnLeftClick(InputAction.CallbackContext context);
         void OnRightClick(InputAction.CallbackContext context);
         void OnMove(InputAction.CallbackContext context);
+    }
+    public interface IPlayerInputsCameraActions
+    {
+        void OnDrag(InputAction.CallbackContext context);
+        void OnZoom(InputAction.CallbackContext context);
     }
 }
