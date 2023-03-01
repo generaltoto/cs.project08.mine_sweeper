@@ -28,6 +28,8 @@ namespace DefaultNamespace
                 case Tile.TileType.EMPTY:
                     GridManager.Instance.HandleEmptyTileReveal(tile);
                     break;
+                default:
+                    throw new Exception($"Tile {tile.Position} type was not recognized");
             }
 
             bool gameOver = CheckIfGameOver();
@@ -36,20 +38,18 @@ namespace DefaultNamespace
 
         public void OnRightClick(Tile tile)
         {
-            if (!tile.IsRevealed)
+            if (tile.IsRevealed) return;
+            switch (tile.IsFlagged)
             {
-                switch (tile.IsFlagged)
-                {
-                    case true:
-                        GridManager.Instance.FlagPositions.Remove(tile.Position);
-                        break;
-                    case false:
-                        GridManager.Instance.FlagPositions.Add(tile.Position);
-                        break;
-                }
-
-                tile.ToggleFlag();
+                case true:
+                    GridManager.Instance.FlagPositions.Remove(tile.Position);
+                    break;
+                case false:
+                    GridManager.Instance.FlagPositions.Add(tile.Position);
+                    break;
             }
+
+            tile.ToggleFlag();
 
             bool gameOver = CheckIfGameOver();
             if (gameOver) HandleWin();
