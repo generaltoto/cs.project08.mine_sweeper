@@ -7,6 +7,7 @@ namespace Grid
 {
     public class Tile : MonoBehaviour
     {
+        [SerializeField] private GameObject highlight;
         public enum TileType
         {
             EMPTY,
@@ -42,6 +43,16 @@ namespace Grid
         private const string BOMB_SPRITE_NAME = "bomb";
         private const string BOMB_EXPLODED_SPRITE_NAME = "bomb_exploded";
 
+
+        void OnMouseEnter()
+        {
+            highlight.SetActive(true);
+        }
+
+        void OnMouseExit()
+        {
+            highlight.SetActive(false);
+        }
         public void InitWithType(TileType type)
         {
             _type = type;
