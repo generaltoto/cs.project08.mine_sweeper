@@ -10,6 +10,7 @@ namespace DefaultNamespace
     public class GameManager : MonoBehaviour
     {
         public static GameManager Instance => _instance ??= FindObjectOfType<GameManager>();
+        public GameObject popup;
 
         public void OnLeftClick(Tile tile)
         {
@@ -49,6 +50,8 @@ namespace DefaultNamespace
                 }
 
                 tile.ToggleFlag();
+                popup.SetActive(!popup.activeSelf);
+
             }
 
             bool gameOver = CheckIfGameOver();
@@ -101,6 +104,8 @@ namespace DefaultNamespace
         private const int GAME_SCENE_INDEX = 1;
         private const int UI_SCENE_INDEX = 2;
 
+
+
         private void Awake()
         {
             if (_instance != null && _instance != this)
@@ -128,6 +133,7 @@ namespace DefaultNamespace
         private void HandleWin()
         {
             Debug.Log("You won!");
+            popup.SetActive(!popup.activeSelf);      
         }
 
         private void InitCam(int w, int h)
@@ -145,5 +151,6 @@ namespace DefaultNamespace
                     GridManager.Instance.BombsPositions.Contains(flagPos)
                 );
         }
+
     }
 }
