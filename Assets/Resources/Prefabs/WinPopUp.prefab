@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 3453687582100943176}
   - component: {fileID: 4825172208327527141}
   - component: {fileID: 4749843790896478983}
-  - component: {fileID: 7447237838990802295}
   m_Layer: 5
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -136,19 +135,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!114 &7447237838990802295
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3718067964575125636}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5e2fc444564b11542b459316434fc6d8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  timerTxt: {fileID: 4749843790896478983}
 --- !u!1 &5584812931824801581
 GameObject:
   m_ObjectHideFlags: 0
@@ -354,7 +340,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 5584812932027356005}
         m_TargetAssemblyTypeName: DefaultNamespace.Popup, Assembly-CSharp
-        m_MethodName: SceneChanger
+        m_MethodName: CloseModal
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

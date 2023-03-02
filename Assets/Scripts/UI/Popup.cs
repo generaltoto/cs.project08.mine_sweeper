@@ -11,18 +11,12 @@ namespace DefaultNamespace
     {
         public GameObject popup;
 
-        
-        /*public void OpenModal()
-        {
-            popup.SetActive(popup.activeSelf);
-        }*/
         public void CloseModal()
         {
             popup.SetActive (!popup.activeSelf);
-            if (!popup.activeSelf) 
-            {
-                Time.timeScale = 1f;
-            }
+            if (!popup.activeSelf) Time.timeScale = 1f;
+            
+            GameManager.Instance.EndGame();
         }
 
     }

@@ -61,7 +61,6 @@ namespace DefaultNamespace
             if (gameOver) HandleWin();
         }
 
-
         public void StartGame(int width, int height)
         {
             SceneManager.LoadSceneAsync(GAME_SCENE_INDEX, LoadSceneMode.Additive).completed += _ =>
@@ -77,22 +76,11 @@ namespace DefaultNamespace
             };
         }
 
-        public void SetDifficulty()
+        public void EndGame()
         {
-            int value = GetComponent<Dropdown>().value;
-
-            switch (value)
-            {
-                case 1:
-                    StartGame(15, 10);
-                    break;
-                case 2:
-                    StartGame(20, 20);
-                    break;
-                case 3:
-                    StartGame(30, 30);
-                    break;
-            }
+            SceneManager.LoadSceneAsync(MAIN_MENU_SCENE_INDEX);
+            SceneManager.UnloadSceneAsync(GAME_SCENE_INDEX);
+            SceneManager.UnloadSceneAsync(UI_SCENE_INDEX);
         }
 
         private void HandleWin()
@@ -100,10 +88,9 @@ namespace DefaultNamespace
             popup = Instantiate(popup, new Vector3(0, 0, 3), Quaternion.identity);
         }
 
-        public void HandleLose()
+        private void HandleLose()
         {
             popup = Instantiate(Losepopup, new Vector3(0, 0, 3), Quaternion.identity);
-
         }
 
         private static GameManager _instance;
@@ -162,17 +149,6 @@ namespace DefaultNamespace
             );
 
             return enoughFlags && allFlagsAreBombs && gameStarted;
-        }
-
-        private void SceneChanger()
-        {
-            if (!popup.activeSelf)
-            {
-                SceneManager.UnloadSceneAsync(1);
-                SceneManager.UnloadSceneAsync(2);   
-            }
-            SceneManager.LoadScene(0);
-
         }
     }
 }
