@@ -102,7 +102,8 @@ namespace DefaultNamespace
 
         public void HandleLose()
         {
-            Debug.Log("You lost!");
+            popup = Instantiate(Losepopup, new Vector3(0, 0, 3), Quaternion.identity);
+
         }
 
         private static GameManager _instance;
@@ -114,6 +115,8 @@ namespace DefaultNamespace
         private const int UI_SCENE_INDEX = 2;
         
         [SerializeField] private GameObject popup;
+        [SerializeField] private GameObject Losepopup;
+        [SerializeField] private GameObject NewGame;
 
         [SerializeField] private AudioSource audioSource;
         [SerializeField] private AudioClip sound;
@@ -159,6 +162,17 @@ namespace DefaultNamespace
             );
 
             return enoughFlags && allFlagsAreBombs && gameStarted;
+        }
+
+        private void SceneChanger()
+        {
+            if (!popup.activeSelf)
+            {
+                SceneManager.UnloadSceneAsync(1);
+                SceneManager.UnloadSceneAsync(2);   
+            }
+            SceneManager.LoadScene(0);
+
         }
     }
 }

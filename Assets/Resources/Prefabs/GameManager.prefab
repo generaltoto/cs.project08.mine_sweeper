@@ -45,10 +45,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: adb15ac20479496d9c00c6d0df004d48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Audio: {fileID: 6188815733204729834}
-  sound: {fileID: 8300000, guid: dd642d2906bc16d4e8f0601748a71748, type: 3}
-  popup: {fileID: 5584812932980458691, guid: b9f21ade0e6fa7647b2abd1a5858a773, type: 3}
   gameStarted: 0
+  popup: {fileID: 5584812932980458691, guid: b9f21ade0e6fa7647b2abd1a5858a773, type: 3}
+  Losepopup: {fileID: 5584812932980458691, guid: fc520404349839049bce0300aa18ae65, type: 3}
+  NewGame: {fileID: 6718202531929836460}
+  audioSource: {fileID: 0}
+  sound: {fileID: 8300000, guid: dd642d2906bc16d4e8f0601748a71748, type: 3}
 --- !u!82 &6188815733204729834
 AudioSource:
   m_ObjectHideFlags: 0

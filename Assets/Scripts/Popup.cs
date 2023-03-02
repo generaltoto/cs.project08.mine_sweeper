@@ -24,5 +24,6 @@ namespace DefaultNamespace
                 Time.timeScale = 1f;
             }
         }
+
     }
 }

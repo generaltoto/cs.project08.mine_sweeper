@@ -1918,6 +1918,10 @@ PrefabInstance:
       value: GameManager
       objectReference: {fileID: 0}
     - target: {fileID: 6718202531929836465, guid: e74533b9f8798cd4a94730122830a6d7, type: 3}
+      propertyPath: NewGame
+      value: 
+      objectReference: {fileID: 1958544525}
+    - target: {fileID: 6718202531929836465, guid: e74533b9f8798cd4a94730122830a6d7, type: 3}
       propertyPath: audioSource
       value: 
       objectReference: {fileID: 554734790}
