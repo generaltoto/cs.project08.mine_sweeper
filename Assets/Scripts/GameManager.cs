@@ -13,8 +13,10 @@ namespace DefaultNamespace
 
         public void OnLeftClick(Tile tile)
         {
+            // If the game did not started yet, so we need to generate the bombs and the clues
             if (!gameStarted) HandleFirstClick(tile);
 
+            // Cannot click on revealed tiles (except clues) or flagged tiles
             if ((tile.IsRevealed && tile.Type != Tile.TileType.CLUE) || tile.IsFlagged) return;
 
             switch (tile.Type)
@@ -34,6 +36,7 @@ namespace DefaultNamespace
                     throw new Exception($"Tile {tile.Position} type was not recognized");
             }
 
+            // Check if the game is over
             bool gameOver = CheckIfGameOver();
             if (gameOver) HandleWin();
         }
@@ -44,7 +47,8 @@ namespace DefaultNamespace
             switch (tile.IsFlagged)
             {
                 case true:
-                    GridManager.Instance.FlagPositions.Remove(tile.Position);
+                    int index = GridManager.Instance.FlagPositions.IndexOf(tile.Position);
+                    if (index != -1) GridManager.Instance.FlagPositions.RemoveAt(index);
                     break;
                 case false:
                     GridManager.Instance.FlagPositions.Add(tile.Position);
@@ -66,7 +70,6 @@ namespace DefaultNamespace
 
                 int bombCount = (int)(width * height * 0.2);
                 GridManager.Instance.Init(width, height, bombCount);
-
                 GridManager.Instance.GenerateBoard();
 
                 SceneManager.LoadScene(UI_SCENE_INDEX, LoadSceneMode.Additive);
@@ -90,7 +93,7 @@ namespace DefaultNamespace
                     break;
             }
         }
-        
+
         public void HandleWin()
         {
             Debug.Log("You won!");
@@ -108,7 +111,7 @@ namespace DefaultNamespace
         private const int MAIN_MENU_SCENE_INDEX = 0;
         private const int GAME_SCENE_INDEX = 1;
         private const int UI_SCENE_INDEX = 2;
-        
+
         [SerializeField] private AudioSource audioSource;
         [SerializeField] private AudioClip sound;
 
@@ -145,11 +148,13 @@ namespace DefaultNamespace
 
         private bool CheckIfGameOver()
         {
-            bool enoughFlags = GridManager.Instance.FlagPositions.Count == GridManager.Instance.BombsPositions.Count;
+            bool enoughFlags =
+                (GridManager.Instance.FlagPositions.Count == GridManager.Instance.BombsPositions.Count) &&
+                (gameStarted);
             bool allFlagsAreBombs = GridManager.Instance.FlagPositions.All(flagPos =>
                 GridManager.Instance.BombsPositions.Contains(flagPos)
             );
-            
+
             return enoughFlags && allFlagsAreBombs && gameStarted;
         }
     }
