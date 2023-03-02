@@ -132,6 +132,7 @@ namespace Grid
                     switch (neighbour.Type)
                     {
                         case Tile.TileType.BOMB:
+                            if (neighbour.IsFlagged) break;
                             HandleBombTileReveal(neighbour);
                             break;
                         case Tile.TileType.CLUE:
@@ -140,6 +141,8 @@ namespace Grid
                         case Tile.TileType.EMPTY:
                             HandleEmptyTileReveal(neighbour);
                             break;
+                        default:
+                            throw new Exception("Tile type was not recognized");
                     }
                 }
             }
@@ -249,7 +252,9 @@ namespace Grid
                 tilesPositions.RemoveAt(randomIndex);
 
                 // Fade out the tile
+                // The IsFadedOut property is used to prevent highlighting the tile when the mouse is over it
                 tile.FadeOut();
+                tile.IsFadedOut = true;
                 
                 // Wait for the tile to fade out
                 yield return new WaitForSeconds(0.0015f);

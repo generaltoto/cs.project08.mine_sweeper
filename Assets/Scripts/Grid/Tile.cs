@@ -21,6 +21,16 @@ namespace Grid
 
         public bool IsFlagged { get; private set; }
 
+        public bool IsFadedOut
+        {
+            get => _isFadedOut;
+            set
+            {
+                _isFadedOut = value;
+                if (value) highlight.SetActive(false);
+            }
+        }
+
         public Vector2Int Position { get; set; }
 
         public int ClueCount { get; set; }
@@ -59,9 +69,9 @@ namespace Grid
             IsFlagged = !IsFlagged;
         }
 
-        public void FadeOut() => _animator.Play("tileFade");
+        public void FadeOut() => _animator.Play(TILE_FADE_ANIMATION_NAME);
 
-        public void PlayFireAnimation() => _animator.Play("tileFire");
+        public void PlayFireAnimation() => _animator.Play(TILE_FIRE_ANIMATION_NAME);
 
         public void OnLeftClickCallback() => GameManager.Instance.OnLeftClick(this);
 
@@ -76,6 +86,8 @@ namespace Grid
         private Animator _animator;
 
         private Vector2Int _position;
+        
+        private bool _isFadedOut;
 
         private const string GRAPHICS_PATH = "Graphics/";
         private const string MASK_PREFAB_NAME = "mask";
@@ -84,6 +96,9 @@ namespace Grid
         private const string WRONG_FLAG_SPRITE_NAME = "bomb_wrong";
         private const string BOMB_SPRITE_NAME = "bomb";
         private const string BOMB_EXPLODED_SPRITE_NAME = "bomb_exploded";
+        
+        private const string TILE_FADE_ANIMATION_NAME = "tileFade";
+        private const string TILE_FIRE_ANIMATION_NAME = "tileFire";
         
         private string GetCorrectPathNameFromType()
         {
@@ -98,16 +113,26 @@ namespace Grid
 
         private void Awake()
         {
+            _spriteRenderer = GetComponent<SpriteRenderer>();
+
             _maskSprite = Resources.Load<Sprite>(GRAPHICS_PATH + MASK_PREFAB_NAME);
             _flagSprite = Resources.Load<Sprite>(GRAPHICS_PATH + FLAG_SPRITE_NAME);
             _wrongFlagSprite = Resources.Load<Sprite>(GRAPHICS_PATH + WRONG_FLAG_SPRITE_NAME);
             
-            _spriteRenderer = GetComponent<SpriteRenderer>();
             _animator = GetComponent<Animator>();
+            IsFadedOut = false;
         }
 
-        private void OnMouseEnter() => highlight.SetActive(true);
-        
-        private void OnMouseExit() => highlight.SetActive(false);
+        private void OnMouseEnter()
+        {
+            if (IsFadedOut) return;
+            highlight.SetActive(true);
+        }
+
+        private void OnMouseExit()
+        {
+            if (IsFadedOut) return;
+            highlight.SetActive(false);
+        }
     }
 }
