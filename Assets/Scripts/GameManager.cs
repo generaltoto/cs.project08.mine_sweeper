@@ -10,7 +10,7 @@ namespace DefaultNamespace
     public class GameManager : MonoBehaviour
     {
         public static GameManager Instance => _instance ??= FindObjectOfType<GameManager>();
-        public GameObject popup;
+        [SerializeField] private GameObject popup;
 
         public void OnLeftClick(Tile tile)
         {
@@ -50,7 +50,7 @@ namespace DefaultNamespace
                 }
 
                 tile.ToggleFlag();
-                popup.SetActive(!popup.activeSelf);
+                popup = Instantiate(popup, new Vector3(0, 0, 3), Quaternion.identity);
 
             }
 

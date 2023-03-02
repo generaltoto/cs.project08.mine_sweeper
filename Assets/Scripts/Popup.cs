@@ -11,11 +11,7 @@ namespace DefaultNamespace
     {
         public GameObject popup;
 
-        public void Start()
-        {
-            popup.SetActive(!popup.activeSelf);
-
-        }
+        
         /*public void OpenModal()
         {
             popup.SetActive(popup.activeSelf);

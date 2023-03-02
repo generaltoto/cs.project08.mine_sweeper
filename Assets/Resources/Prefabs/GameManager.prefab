@@ -44,5 +44,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: adb15ac20479496d9c00c6d0df004d48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cam: {fileID: 0}
+  popup: {fileID: 5584812932980458691, guid: b9f21ade0e6fa7647b2abd1a5858a773, type: 3}
   gameStarted: 0
