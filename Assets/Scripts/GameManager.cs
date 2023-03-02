@@ -10,18 +10,21 @@ namespace DefaultNamespace
     public class GameManager : MonoBehaviour
     {
         public static GameManager Instance => _instance ??= FindObjectOfType<GameManager>();
-        [SerializeField] private GameObject popup;
 
         public void OnLeftClick(Tile tile)
         {
+            // If the game did not started yet, so we need to generate the bombs and the clues
             if (!gameStarted) HandleFirstClick(tile);
 
+            // Cannot click on revealed tiles (except clues) or flagged tiles
             if ((tile.IsRevealed && tile.Type != Tile.TileType.CLUE) || tile.IsFlagged) return;
 
             switch (tile.Type)
             {
                 case Tile.TileType.BOMB:
                     GridManager.Instance.HandleBombTileReveal(tile);
+                    audioSource.PlayOneShot(sound);
+                    HandleLose();
                     break;
                 case Tile.TileType.CLUE:
                     GridManager.Instance.HandleClueTileReveal(tile);
@@ -29,52 +32,48 @@ namespace DefaultNamespace
                 case Tile.TileType.EMPTY:
                     GridManager.Instance.HandleEmptyTileReveal(tile);
                     break;
+                default:
+                    throw new Exception($"Tile {tile.Position} type was not recognized");
             }
 
+            // Check if the game is over
             bool gameOver = CheckIfGameOver();
             if (gameOver) HandleWin();
         }
 
         public void OnRightClick(Tile tile)
         {
-            if (!tile.IsRevealed)
+            if (tile.IsRevealed) return;
+            switch (tile.IsFlagged)
             {
-                switch (tile.IsFlagged)
-                {
-                    case true:
-                        GridManager.Instance.FlagPositions.Remove(tile.Position);
-                        break;
-                    case false:
-                        GridManager.Instance.FlagPositions.Add(tile.Position);
-                        break;
-                }
-
-                tile.ToggleFlag();
-                popup = Instantiate(popup, new Vector3(0, 0, 3), Quaternion.identity);
-
+                case true:
+                    int index = GridManager.Instance.FlagPositions.IndexOf(tile.Position);
+                    if (index != -1) GridManager.Instance.FlagPositions.RemoveAt(index);
+                    break;
+                case false:
+                    GridManager.Instance.FlagPositions.Add(tile.Position);
+                    break;
             }
+
+            tile.ToggleFlag();
 
             bool gameOver = CheckIfGameOver();
             if (gameOver) HandleWin();
         }
 
+
         public void StartGame(int width, int height)
         {
             SceneManager.LoadSceneAsync(GAME_SCENE_INDEX, LoadSceneMode.Additive).completed += _ =>
             {
-                SceneManager.UnloadSceneAsync(MAIN_MENU_SCENE_INDEX).completed += _ =>
-                {
-                    InitCam(width, height);
-                };
+                SceneManager.UnloadSceneAsync(MAIN_MENU_SCENE_INDEX).completed += _ => { InitCam(width, height); };
                 gameStarted = false;
 
                 int bombCount = (int)(width * height * 0.2);
                 GridManager.Instance.Init(width, height, bombCount);
-
                 GridManager.Instance.GenerateBoard();
-                
+
                 SceneManager.LoadScene(UI_SCENE_INDEX, LoadSceneMode.Additive);
-                
             };
         }
 
@@ -96,6 +95,16 @@ namespace DefaultNamespace
             }
         }
 
+        private void HandleWin()
+        {
+            popup = Instantiate(popup, new Vector3(0, 0, 3), Quaternion.identity);
+        }
+
+        public void HandleLose()
+        {
+            Debug.Log("You lost!");
+        }
+
         private static GameManager _instance;
 
         [SerializeField] private bool gameStarted;
@@ -103,8 +112,11 @@ namespace DefaultNamespace
         private const int MAIN_MENU_SCENE_INDEX = 0;
         private const int GAME_SCENE_INDEX = 1;
         private const int UI_SCENE_INDEX = 2;
+        
+        [SerializeField] private GameObject popup;
 
-
+        [SerializeField] private AudioSource audioSource;
+        [SerializeField] private AudioClip sound;
 
         private void Awake()
         {
@@ -130,12 +142,6 @@ namespace DefaultNamespace
             gameStarted = true;
         }
 
-        private void HandleWin()
-        {
-            Debug.Log("You won!");
-            popup.SetActive(!popup.activeSelf);      
-        }
-
         private void InitCam(int w, int h)
         {
             Camera mainCam = Camera.main!;
@@ -145,12 +151,14 @@ namespace DefaultNamespace
 
         private bool CheckIfGameOver()
         {
-            return
-                GridManager.Instance.FlagPositions.Count == GridManager.Instance.BombsPositions.Count &&
-                GridManager.Instance.FlagPositions.All(flagPos =>
-                    GridManager.Instance.BombsPositions.Contains(flagPos)
-                );
-        }
+            bool enoughFlags =
+                (GridManager.Instance.FlagPositions.Count == GridManager.Instance.BombsPositions.Count) &&
+                (gameStarted);
+            bool allFlagsAreBombs = GridManager.Instance.FlagPositions.All(flagPos =>
+                GridManager.Instance.BombsPositions.Contains(flagPos)
+            );
 
+            return enoughFlags && allFlagsAreBombs && gameStarted;
+        }
     }
 }

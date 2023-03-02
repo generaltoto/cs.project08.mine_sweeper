@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,7 +17,7 @@ namespace Grid
         public List<Vector2Int> BombsPositions { get; private set; }
 
         public int BombsCount { get; private set; }
-        
+
         public int FlagsCount => FlagPositions.Count;
 
         public void Init(int width, int height, int bombsCount)
@@ -44,24 +45,27 @@ namespace Grid
 
         public void GenerateBombs(Vector2Int forbiddenPos)
         {
-            (int x, int y) bombPos = (0, 0);
+            // Get all tiles positions
+            List<Vector2Int> tilesPositions = GetAllTilesPositions();
 
             for (int i = 0; i < BombsCount; i++)
             {
-                // We generate bombs coordinates until we find an empty spot. 
-                // The bomb coordinates are not allowed to be around / be first clicked tile coordinates.
+                // Generate a random index and get the position at this index
+                int randomIndex;
+                Vector2Int position;
                 do
                 {
-                    // TODO : find a better random generation. e.g : int random = Random.Range(0, _width * _height - 1);
-                    bombPos.x = Random.Range(0, _width);
-                    bombPos.y = Random.Range(0, _height);
-                } while (
-                    _board[bombPos.x, bombPos.y].Type == Tile.TileType.BOMB ||
-                    IsAroundClickedTile(bombPos.x, bombPos.y, forbiddenPos.x, forbiddenPos.y)
-                );
+                    // Regenerate a random index if the position is around the clicked tile or is the clicked tile
+                    randomIndex = Random.Range(0, tilesPositions.Count);
+                    position = tilesPositions[randomIndex];
+                } while (IsAroundClickedTile(position.x, position.y, forbiddenPos.x, forbiddenPos.y));
 
-                _board[bombPos.x, bombPos.y].InitWithType(Tile.TileType.BOMB);
-                BombsPositions.Add(new Vector2Int(bombPos.x, bombPos.y));
+                // Init the tile at the final position as a bomb
+                _board[position.x, position.y].InitWithType(Tile.TileType.BOMB);
+
+                // Remove the position from the list of available positions and add it to the list of bombs positions
+                tilesPositions.RemoveAt(randomIndex);
+                BombsPositions.Add(position);
             }
         }
 
@@ -128,6 +132,7 @@ namespace Grid
                     switch (neighbour.Type)
                     {
                         case Tile.TileType.BOMB:
+                            if (neighbour.IsFlagged) break;
                             HandleBombTileReveal(neighbour);
                             break;
                         case Tile.TileType.CLUE:
@@ -136,6 +141,8 @@ namespace Grid
                         case Tile.TileType.EMPTY:
                             HandleEmptyTileReveal(neighbour);
                             break;
+                        default:
+                            throw new Exception("Tile type was not recognized");
                     }
                 }
             }
@@ -144,7 +151,11 @@ namespace Grid
 
         public void HandleBombTileReveal(Tile tile)
         {
+            // ReSharper disable HeapView.ObjectAllocation
+            
             if (!tile.IsFlagged) tile.Reveal(true, false);
+
+            StartCoroutine(HandleBombOnFire(tile));
 
             FlagPositions
                 .ForEach(tilePos => _board[tilePos.x, tilePos.y].Reveal(false, true));
@@ -153,6 +164,8 @@ namespace Grid
                 .Where(tilePos => _board[tilePos.x, tilePos.y].IsRevealed == false)
                 .ToList()
                 .ForEach(tilePos => _board[tilePos.x, tilePos.y].Reveal(false, false));
+            
+            StartCoroutine(HandleTilesFadeOut());
         }
 
 
@@ -169,6 +182,11 @@ namespace Grid
         {
             if (_instance == null) _instance = this;
         }
+
+        private List<Vector2Int> GetAllTilesPositions() =>
+            Enumerable.Range(0, _width)
+                .SelectMany(x => Enumerable.Range(0, _height).Select(y => new Vector2Int(x, y)))
+                .ToList();
 
         private List<Tile> GetNeighbours(int x, int y)
         {
@@ -211,6 +229,43 @@ namespace Grid
             tileGameObject.name = new StringBuilder().Append(x).Append("_").Append(y).ToString();
 
             return tileGameObject;
+        }
+
+        private IEnumerator HandleTilesFadeOut()
+        {
+            // We wait for the explosion animation to end
+            yield return new WaitForSeconds(2f);
+            
+            // Get all tiles positions
+            List<Vector2Int> tilesPositions = GetAllTilesPositions();
+
+            while (tilesPositions.Count > 0)
+            {
+                // Get a random tile position
+                int randomIndex = Random.Range(0, tilesPositions.Count);
+                Vector2Int position = tilesPositions[randomIndex];
+
+                // Get the tile at the random position
+                Tile tile = _board[position.x, position.y];
+
+                // Remove the position from the list of available positions
+                tilesPositions.RemoveAt(randomIndex);
+
+                // Fade out the tile
+                // The IsFadedOut property is used to prevent highlighting the tile when the mouse is over it
+                tile.FadeOut();
+                tile.IsFadedOut = true;
+                
+                // Wait for the tile to fade out
+                yield return new WaitForSeconds(0.0015f);
+            }
+        }
+
+        private IEnumerator HandleBombOnFire(Tile tile)
+        {
+            tile.PlayFireAnimation();
+            
+            yield return new WaitForSeconds(2f);
         }
     }
 }

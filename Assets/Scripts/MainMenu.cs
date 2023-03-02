@@ -16,7 +16,7 @@ namespace DefaultNamespace
 
         public void UpdateValueFromDropdown()
         {
-            switch (GetComponent<Dropdown>().value)
+            switch (dropdown.value)
             {
                 case 0:
                 case 1:
@@ -36,6 +36,8 @@ namespace DefaultNamespace
 
         [SerializeField] private int width;
         [SerializeField] private int height;
+        
+        [SerializeField] private Dropdown dropdown;
 
         private const int DEFAULT_WIDTH = 9;
         private const int DEFAULT_HEIGHT = 9;
